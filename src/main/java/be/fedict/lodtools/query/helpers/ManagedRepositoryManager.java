@@ -26,7 +26,7 @@
 package be.fedict.lodtools.query.helpers;
 
 import io.dropwizard.lifecycle.Managed;
-import org.eclipse.rdf4j.repository.Repository;
+
 import org.eclipse.rdf4j.repository.manager.RepositoryManager;
 
 /**

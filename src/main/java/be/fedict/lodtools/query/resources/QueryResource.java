@@ -25,19 +25,15 @@
  */
 package be.fedict.lodtools.query.resources;
 
-import be.fedict.lodtools.web.helpers.RDFMediaType;
+import be.fedict.lodtools.query.helpers.RDFMediaType;
 
 import com.codahale.metrics.annotation.ExceptionMetered;
-import java.util.HashMap;
-import java.util.List;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriInfo;
 
 import org.eclipse.rdf4j.model.Model;
@@ -64,9 +60,8 @@ public class QueryResource extends RdfResource {
 	@Path("/{repo}/{query}")
 	@ExceptionMetered
 	public Model query(@PathParam("repo") String repo, @PathParam("query") String qry,
-			@Context UriInfo info) {
-		MultivaluedMap<String, String> params = info.getQueryParameters();		
-		query(repo, qry, info.getQueryParameters());
+			@Context UriInfo info) {		
+		return query(repo, qry, info.getQueryParameters());
 	}
 	
 	public QueryResource(RepositoryManager mgr, Repository queryRepo) {

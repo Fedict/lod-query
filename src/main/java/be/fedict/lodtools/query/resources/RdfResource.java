@@ -39,6 +39,7 @@ import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
+
 import org.eclipse.rdf4j.model.vocabulary.DCAT;
 import org.eclipse.rdf4j.model.vocabulary.DCTERMS;
 import org.eclipse.rdf4j.model.vocabulary.FOAF;
@@ -58,6 +59,7 @@ import org.eclipse.rdf4j.query.QueryLanguage;
 import org.eclipse.rdf4j.query.QueryResult;
 import org.eclipse.rdf4j.query.QueryResults;
 import org.eclipse.rdf4j.query.TupleQuery;
+import org.eclipse.rdf4j.query.TupleQueryResult;
 
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
@@ -77,22 +79,16 @@ public abstract class RdfResource {
 	private final Repository queryRepo;
 	private final ValueFactory fac;
 	
-	
 	private final static String Q = 
-		"PREFIX sp: <http://spinrdf.org/sp#> " + "\n"
+		"PREFIX query: <http://id.belgium.be/query#> " + "\n"
 		+ " SELECT ?txt "
 		+ " WHERE { "
-		+ "	?qry a sp:Query . " 
-		+ " ?qry sp:text ?txt . }"; 
-	/**
-	 * Get string as URI
-	 * 
-	 * @param uri
-	 * @return URI representation
-	 */
-	protected IRI asURI(String uri) {
-		return fac.createIRI(uri);
-	}
+		+ "	?qry a query:Query . " 
+		+ " ?qry query:repository ?repo . "
+		+ " ?qry query:name ?name ."
+		+ " ?qry query:text ?txt "
+		+ "}";
+	
 	
 	/**
 	 * Get string as RDF literal
@@ -156,9 +152,23 @@ public abstract class RdfResource {
 		return null;
 	}
 	
-	protected String getQuery(String repoName, String qryName) {
+	/**
+	 * Get query string
+	 * 
+	 * @param repoName repository name
+	 * @param qryName query name
+	 * @return query as string
+	 */
+	protected String getQueryString(String repoName, String qryName) {
 		try (RepositoryConnection con = queryRepo.getConnection()) {
-			con.ge
+			TupleQuery q = con.prepareTupleQuery(Q);
+			q.setBinding("repo", asLiteral(repoName));
+			q.setBinding("name", asLiteral(qryName));
+			
+			TupleQueryResult res = q.evaluate();
+			return QueryResults.singleResult(res).getValue("txt").stringValue();
+		} catch (RepositoryException|MalformedQueryException|QueryEvaluationException e) {
+			throw new WebApplicationException(e);
 		}
 	}
 	
@@ -197,7 +207,7 @@ public abstract class RdfResource {
 		}
 		HashMap<String,Literal> bindings = bind(params);
 		
-		String qry = getQuery(repoName, qryName);
+		String qry = getQueryString(repoName, qryName);
 		
 		// Query happens here
 		try (RepositoryConnection conn = repo.getConnection()) {
@@ -226,4 +236,3 @@ public abstract class RdfResource {
 		this.fac = queryRepo.getValueFactory();
 	}
 }
-
