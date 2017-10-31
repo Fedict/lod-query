@@ -50,7 +50,8 @@ import org.eclipse.rdf4j.repository.manager.RepositoryManager;
 public class QueryResource extends RdfResource {
 
 	/**
-	 *
+	 * Execute a query
+	 * 
 	 * @param repo repository name
 	 * @param qry query name
 	 * @param info URI context
