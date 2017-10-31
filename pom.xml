@@ -27,7 +27,8 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
-    <plugins>
+    <build>
+	<plugins>
 	    <plugin>
 		<groupId>org.apache.maven.plugins</groupId>
 		<artifactId>maven-shade-plugin</artifactId>
@@ -63,4 +64,5 @@
 		</executions>
 	    </plugin>
 	</plugins>
+    </build>
 </project>
