@@ -25,10 +25,19 @@
  */
 package be.fedict.lodtools.query.helpers;
 
+import com.github.jsonldjava.core.JsonLdError;
+import com.github.jsonldjava.core.JsonLdOptions;
+import com.github.jsonldjava.core.JsonLdProcessor;
+import com.github.jsonldjava.utils.JsonUtils;
+
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.StringWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
@@ -39,6 +48,7 @@ import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
 
 import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.RDFHandlerException;
 import org.eclipse.rdf4j.rio.Rio;
@@ -49,34 +59,42 @@ import org.eclipse.rdf4j.rio.Rio;
  * @author Bart.Hanssens
  */
 @Provider
-@Produces({RDFMediaType.JSONLD + ";charset=utf-8", 
-			RDFMediaType.NTRIPLES + ";charset=utf-8", 
-			RDFMediaType.TTL + ";charset=utf-8"})
-public class RDFMessageBodyWriter implements MessageBodyWriter<Model> {
+@Produces(RDFMediaType.JSONLD + ";charset=utf-8")
+public class JSONLDMessageBodyWriter implements MessageBodyWriter<ModelFrame> {
 	@Override
 	public boolean isWriteable(Class<?> type, Type generic, Annotation[] antns, MediaType mt) {
 		return generic == Model.class;
 	}
 
 	@Override
-	public long getSize(Model m, Class<?> type, Type generic, Annotation[] antns, MediaType mt) {
+	public long getSize(ModelFrame mf, Class<?> type, Type generic, Annotation[] antns, MediaType mt) {
 		return 0; // ignored by Jersey 2.0 anyway
 	}
 
 	@Override
-	public void writeTo(Model m, Class<?> type, Type generic, Annotation[] antns, MediaType mt, 
+	public void writeTo(ModelFrame mf, Class<?> type, Type generic, Annotation[] antns, MediaType mt, 
 										MultivaluedMap<String, Object> mm, OutputStream out) 
 									throws IOException, WebApplicationException {
-		if (m.isEmpty()) {
+		if (mf.getModel().isEmpty()) {
 			throw new WebApplicationException(Response.Status.NOT_FOUND);
 		}
 		
-		RDFFormat fmt = RDFMediaType.getRDFFormat(mt);
-		
+		StringWriter w = new StringWriter();
+
 		try {
-			Rio.write(m, out, fmt);
-		} catch (RDFHandlerException ex) {
+			Rio.write(mf.getModel(), out, RDFFormat.JSONLD);
+			
+			Object json = JsonUtils.fromString(w.toString());
+			Object frame = JsonUtils.fromString(mf.getFrame());
+			
+			JsonLdOptions opts = new JsonLdOptions();
+			opts.setCompactArrays(Boolean.TRUE);
+			opts.setEmbed(Boolean.TRUE);
+	
+			Map<String, Object> jsonld = JsonLdProcessor.frame(json, frame, opts); 
+			//JsonUtils.writePrettyPrint(new OutputStreamWriter(out), jsonld);
+		} catch (RDFHandlerException|JsonLdError ex) {
 			throw new WebApplicationException(ex);
-		}
+		} 
 	}
 }

@@ -26,13 +26,14 @@
 package be.fedict.lodtools.query;
 
 import be.fedict.lodtools.query.health.RdfStoreHealthCheck;
+import be.fedict.lodtools.query.helpers.FrameReader;
 import be.fedict.lodtools.query.helpers.ManagedRepositoryManager;
-import be.fedict.lodtools.query.helpers.RDFMessageBodyWriter;
+import be.fedict.lodtools.query.helpers.QueryReader;
+import be.fedict.lodtools.query.helpers.JSONLDMessageBodyWriter;
 import be.fedict.lodtools.query.resources.QueryResource;
 
 import io.dropwizard.Application;
 import io.dropwizard.setup.Environment;
-import org.eclipse.rdf4j.repository.Repository;
 
 import org.eclipse.rdf4j.repository.manager.RemoteRepositoryManager;
 import org.eclipse.rdf4j.repository.manager.RepositoryProvider;
@@ -50,6 +51,11 @@ public class App extends Application<AppConfig> {
 	
 	@Override
     public void run(AppConfig config, Environment env) {
+		
+		// Query and JSONLD frame readers
+		QueryReader qr = new QueryReader(config.getQueryRoot());
+		FrameReader fr = new FrameReader(config.getQueryRoot());
+		
 		// repository
 		String endpoint = config.getSparqlPoint();
 		RemoteRepositoryManager mgr = 
@@ -59,16 +65,14 @@ public class App extends Application<AppConfig> {
 		}
 		mgr.initialize();
 		
-		Repository queryRepo = mgr.getRepository(config.getQueryRepo());
-		queryRepo.initialize();
-		
 		// Managed resource
 		env.lifecycle().manage(new ManagedRepositoryManager(mgr));	
 		// Page regource
-		env.jersey().register(new QueryResource(mgr, queryRepo));
+		env.jersey().register(new QueryResource(mgr, qr, fr));
 		
 		// RDF Serialization format
-		env.jersey().register(new RDFMessageBodyWriter());
+		env.jersey().register(new JSONLDMessageBodyWriter());
+		
 		
 		// Monitoring
 		RdfStoreHealthCheck check = new RdfStoreHealthCheck(mgr.getSystemRepository());

@@ -25,37 +25,54 @@
  */
 package be.fedict.lodtools.query.helpers;
 
-import javax.ws.rs.core.MediaType;
-import org.eclipse.rdf4j.rio.RDFFormat;
+import java.io.BufferedReader;
+import java.io.IOException;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+import javax.ws.rs.WebApplicationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Helper class for RDF serialization types
+ * Read the query string from a source
  * 
  * @author Bart.Hanssens
  */
-public class RDFMediaType {
-	private final static Logger LOG = LoggerFactory.getLogger(RDFMediaType.class);
-	// can't use RDFFormat.xyz.toString(): not constant
-	public final static String JSONLD = "application/ld+json";
-	public final static String NTRIPLES = "application/n-triples";
-	public final static String TTL = "text/turtle";
+public class FrameReader {
+	private final static Logger LOG = LoggerFactory.getLogger(FrameReader.class);
+	
+	private final String root;
+	/**
+	 * Get the query string
+	 * 
+	 * @param repoName repository name
+	 * @param qryName query name
+	 * @return raw query string
+	 */
+	public String get(String repoName, String qryName) {
+		StringBuffer buffer = new StringBuffer();
+		
+		Path file = Paths.get(root, repoName, qryName + ".frame");
+		LOG.info("Load frame from {}", file);
+		try (BufferedReader r = Files.newBufferedReader(file)) {
+			r.lines().forEach(buffer::append);
+		} catch (IOException e) {
+			throw new WebApplicationException(e);
+		}
+		LOG.info("{}", buffer.toString());
+		return buffer.toString();
+	}
 	
 	/**
-	 * Get RDF Format from mediatype
+	 * Constructor
 	 * 
-	 * @param mt Jersey media type
-	 * @return RDF4J rdf format 
+	 * @param root root directory
+	 * 
 	 */
-	public static RDFFormat getRDFFormat(MediaType mt) {
-		RDFFormat fmt;
-		
-		switch(mt.toString()) {
-			case RDFMediaType.NTRIPLES: fmt = RDFFormat.NTRIPLES; break;
-			case RDFMediaType.TTL: fmt = RDFFormat.TURTLE; break;
-			default: fmt = RDFFormat.JSONLD; break;
-		}
-		return fmt;
+	public FrameReader(String root) {
+		this.root = root;
 	}
 }

@@ -25,7 +25,10 @@
  */
 package be.fedict.lodtools.query.resources;
 
+import be.fedict.lodtools.query.helpers.FrameReader;
+import be.fedict.lodtools.query.helpers.QueryReader;
 import be.fedict.lodtools.query.helpers.RDFMediaType;
+import java.io.IOException;
 
 import java.text.MessageFormat;
 import java.util.HashMap;
@@ -37,8 +40,11 @@ import javax.ws.rs.core.MultivaluedMap;
 import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 
 import org.eclipse.rdf4j.model.vocabulary.DCAT;
 import org.eclipse.rdf4j.model.vocabulary.DCTERMS;
@@ -52,6 +58,7 @@ import org.eclipse.rdf4j.model.vocabulary.ROV;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 
 import org.eclipse.rdf4j.query.GraphQuery;
+import org.eclipse.rdf4j.query.GraphQueryResult;
 import org.eclipse.rdf4j.query.MalformedQueryException;
 import org.eclipse.rdf4j.query.Query;
 import org.eclipse.rdf4j.query.QueryEvaluationException;
@@ -64,6 +71,7 @@ import org.eclipse.rdf4j.query.TupleQueryResult;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.RepositoryException;
+import org.eclipse.rdf4j.repository.RepositoryResult;
 import org.eclipse.rdf4j.repository.manager.RepositoryManager;
 
 
@@ -76,19 +84,10 @@ import org.eclipse.rdf4j.repository.manager.RepositoryManager;
 @Produces({RDFMediaType.JSONLD, RDFMediaType.NTRIPLES, RDFMediaType.TTL})
 public abstract class RdfResource {
 	private final RepositoryManager mgr;
-	private final Repository queryRepo;
-	private final ValueFactory fac;
-	
-	private final static String Q = 
-		"PREFIX query: <http://id.belgium.be/query#> " + "\n"
-		+ " SELECT ?txt "
-		+ " WHERE { "
-		+ "	?qry a query:Query . " 
-		+ " ?qry query:repository ?repo . "
-		+ " ?qry query:name ?name ."
-		+ " ?qry query:text ?txt "
-		+ "}";
-	
+	private final QueryReader qr;
+
+	private final ValueFactory fac = SimpleValueFactory.getInstance();
+
 	
 	/**
 	 * Get string as RDF literal
@@ -153,26 +152,6 @@ public abstract class RdfResource {
 	}
 	
 	/**
-	 * Get query string
-	 * 
-	 * @param repoName repository name
-	 * @param qryName query name
-	 * @return query as string
-	 */
-	protected String getQueryString(String repoName, String qryName) {
-		try (RepositoryConnection con = queryRepo.getConnection()) {
-			TupleQuery q = con.prepareTupleQuery(Q);
-			q.setBinding("repo", asLiteral(repoName));
-			q.setBinding("name", asLiteral(qryName));
-			
-			TupleQueryResult res = q.evaluate();
-			return QueryResults.singleResult(res).getValue("txt").stringValue();
-		} catch (RepositoryException|MalformedQueryException|QueryEvaluationException e) {
-			throw new WebApplicationException(e);
-		}
-	}
-	
-	/**
 	 * Turn HTTP parameters into query bindings
 	 * 
 	 * @param params HTTP params
@@ -207,17 +186,33 @@ public abstract class RdfResource {
 		}
 		HashMap<String,Literal> bindings = bind(params);
 		
-		String qry = getQueryString(repoName, qryName);
+		String qry = "";
+		try {
+			qry = qr.get(repoName, qryName);
+		} catch (IOException e) {
+			throw new WebApplicationException(e);
+		}
 		
 		// Query happens here
 		try (RepositoryConnection conn = repo.getConnection()) {
-			Query q = conn.prepareQuery(QueryLanguage.SPARQL, qry);
+			/*
+			GraphQuery q = conn.prepareGraphQuery(QueryLanguage.SPARQL, qry);
 			bindings.forEach((k,v) -> q.setBinding(k, v));
-			
-			QueryResult res = evaluate(q);
-			
-			return setNamespaces((res != null) ? QueryResults.asModel(res) 
-													: new LinkedHashModel());
+			Model m = new LinkedHashModel();
+			try (GraphQueryResult res = (GraphQueryResult) evaluate(q)) {
+			if (res != null) {
+			while (res.hasNext()) {
+			m.add(res.next());
+			}
+			}
+			}*/
+			Model m = new LinkedHashModel();
+			try (RepositoryResult<Statement> statements = conn.getStatements(null, RDF.TYPE, SKOS.CONCEPT, (Resource) null)) {
+				while (statements.hasNext()) {
+					m.add(statements.next());
+				}
+			}
+			return setNamespaces(m);
 		} catch (RepositoryException|MalformedQueryException|QueryEvaluationException e) {
 			throw new WebApplicationException(e);
 		}
@@ -228,11 +223,10 @@ public abstract class RdfResource {
 	 * Constructor
 	 * 
 	 * @param mgr repository manager
-	 * @param queryRepo query repository
+	 * @param qr query  reader
 	 */
-	public RdfResource(RepositoryManager mgr, Repository queryRepo) {
+	public RdfResource(RepositoryManager mgr, QueryReader qr) {
 		this.mgr = mgr;
-		this.queryRepo = queryRepo;
-		this.fac = queryRepo.getValueFactory();
+		this.qr = qr;
 	}
 }

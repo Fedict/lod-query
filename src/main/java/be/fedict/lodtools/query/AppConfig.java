@@ -42,7 +42,7 @@ public class AppConfig extends Configuration {
 	private String username;
 	private String password;
 
-	private String queryRepo;
+	private String queryRoot;
 	
 
 	@JsonProperty
@@ -76,12 +76,12 @@ public class AppConfig extends Configuration {
 	}
 	
 	@JsonProperty
-	public String getQueryRepo() {
-		return queryRepo;
+	public String getQueryRoot() {
+		return queryRoot;
 	}
 
 	@JsonProperty
-	public void setQueryRepo(String queryRepo) {
-		this.queryRepo = queryRepo;
+	public void setQueryRoot(String queryRoot) {
+		this.queryRoot = queryRoot;
 	}
 }
