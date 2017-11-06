@@ -26,7 +26,6 @@
 package be.fedict.lodtools.query;
 
 import be.fedict.lodtools.query.health.RdfStoreHealthCheck;
-import be.fedict.lodtools.query.helpers.FrameReader;
 import be.fedict.lodtools.query.helpers.ManagedRepositoryManager;
 import be.fedict.lodtools.query.helpers.QueryReader;
 import be.fedict.lodtools.query.helpers.JSONLDMessageBodyWriter;
@@ -54,7 +53,6 @@ public class App extends Application<AppConfig> {
 		
 		// Query and JSONLD frame readers
 		QueryReader qr = new QueryReader(config.getQueryRoot());
-		FrameReader fr = new FrameReader(config.getQueryRoot());
 		
 		// repository
 		String endpoint = config.getSparqlPoint();
@@ -67,12 +65,12 @@ public class App extends Application<AppConfig> {
 		
 		// Managed resource
 		env.lifecycle().manage(new ManagedRepositoryManager(mgr));	
-		// Page regource
-		env.jersey().register(new QueryResource(mgr, qr, fr));
-		
+	
 		// RDF Serialization format
 		env.jersey().register(new JSONLDMessageBodyWriter());
-		
+			
+		// Page regource
+		env.jersey().register(new QueryResource(mgr, qr));
 		
 		// Monitoring
 		RdfStoreHealthCheck check = new RdfStoreHealthCheck(mgr.getSystemRepository());

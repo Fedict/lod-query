@@ -25,7 +25,7 @@
  */
 package be.fedict.lodtools.query.resources;
 
-import be.fedict.lodtools.query.helpers.FrameReader;
+import be.fedict.lodtools.query.helpers.ModelFrame;
 import be.fedict.lodtools.query.helpers.QueryReader;
 import be.fedict.lodtools.query.helpers.RDFMediaType;
 import java.io.IOException;
@@ -39,9 +39,6 @@ import javax.ws.rs.core.MultivaluedMap;
 
 import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.Model;
-import org.eclipse.rdf4j.model.IRI;
-import org.eclipse.rdf4j.model.Resource;
-import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
@@ -66,12 +63,10 @@ import org.eclipse.rdf4j.query.QueryLanguage;
 import org.eclipse.rdf4j.query.QueryResult;
 import org.eclipse.rdf4j.query.QueryResults;
 import org.eclipse.rdf4j.query.TupleQuery;
-import org.eclipse.rdf4j.query.TupleQueryResult;
 
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.RepositoryException;
-import org.eclipse.rdf4j.repository.RepositoryResult;
 import org.eclipse.rdf4j.repository.manager.RepositoryManager;
 
 
@@ -81,7 +76,7 @@ import org.eclipse.rdf4j.repository.manager.RepositoryManager;
  * @author Bart.Hanssens
  */
 
-@Produces({RDFMediaType.JSONLD, RDFMediaType.NTRIPLES, RDFMediaType.TTL})
+@Produces({RDFMediaType.JSONLD})
 public abstract class RdfResource {
 	private final RepositoryManager mgr;
 	private final QueryReader qr;
@@ -103,11 +98,15 @@ public abstract class RdfResource {
 	 * Get the repository from name
 	 * 
 	 * @param repoName name of the repository
-	 * @return initialized repository or null
+	 * @return initialized repository
+	 * @throws WebApplicationException if repository cannot be opened
 	 */
 	protected Repository getRepository(String repoName) {
 		Repository repo = mgr.getRepository(repoName);
-		if (repo != null && !repo.isInitialized()) {
+		if (repo == null) {
+			throw new WebApplicationException(MessageFormat.format("Repo {0} not found", repo));
+		}
+		if (!repo.isInitialized()) {
 			repo.initialize();
 		}
 		return repo;
@@ -120,7 +119,7 @@ public abstract class RdfResource {
 	 * @return model with namespace prefixes
 	 */
 	protected Model setNamespaces(Model m) {
-		if (! m.isEmpty()) {
+		if (m != null && !m.isEmpty()) {
 			m.setNamespace(DCAT.PREFIX, DCAT.NAMESPACE);
 			m.setNamespace(DCTERMS.PREFIX, DCTERMS.NAMESPACE);
 			m.setNamespace(FOAF.PREFIX, FOAF.NAMESPACE);
@@ -159,6 +158,7 @@ public abstract class RdfResource {
 	 */
 	protected HashMap<String,Literal> bind(MultivaluedMap<String,String> params) {
 		HashMap<String,Literal> bindings = new HashMap<>();
+		
 		if (params != null) {
 			for(String key: params.keySet()) {
 				String p = params.getFirst(key);
@@ -169,7 +169,6 @@ public abstract class RdfResource {
 		}
 		return bindings;
 	}
-
 	
 	/**
 	 * Prepare and run a SPARQL query
@@ -179,40 +178,20 @@ public abstract class RdfResource {
 	 * @param params parameters for bindings (if any)
 	 * @return results in triple model
 	 */
-	protected Model query(String repoName, String qryName, MultivaluedMap<String,String> params) {
+	protected ModelFrame query(String repoName, String qryName, MultivaluedMap<String,String> params) {
 		Repository repo = getRepository(repoName);
-		if (repo == null) {
-			throw new WebApplicationException(MessageFormat.format("Repo {0} not found", repo));
-		}
-		HashMap<String,Literal> bindings = bind(params);
 		
-		String qry = "";
-		try {
-			qry = qr.get(repoName, qryName);
-		} catch (IOException e) {
-			throw new WebApplicationException(e);
-		}
-		
-		// Query happens here
+		String f = qr.getFrame(repoName, qryName);
+		String qry = qr.getQuery(repoName, qryName);
+			
 		try (RepositoryConnection conn = repo.getConnection()) {
-			/*
 			GraphQuery q = conn.prepareGraphQuery(QueryLanguage.SPARQL, qry);
-			bindings.forEach((k,v) -> q.setBinding(k, v));
-			Model m = new LinkedHashModel();
-			try (GraphQueryResult res = (GraphQueryResult) evaluate(q)) {
-			if (res != null) {
-			while (res.hasNext()) {
-			m.add(res.next());
-			}
-			}
-			}*/
-			Model m = new LinkedHashModel();
-			try (RepositoryResult<Statement> statements = conn.getStatements(null, RDF.TYPE, SKOS.CONCEPT, (Resource) null)) {
-				while (statements.hasNext()) {
-					m.add(statements.next());
-				}
-			}
-			return setNamespaces(m);
+
+			bind(params).forEach((k,v) -> q.setBinding(k, v));
+			
+			Model m = setNamespaces(QueryResults.asModel((GraphQueryResult) evaluate(q)));
+			
+			return new ModelFrame(m, f);
 		} catch (RepositoryException|MalformedQueryException|QueryEvaluationException e) {
 			throw new WebApplicationException(e);
 		}

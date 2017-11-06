@@ -25,7 +25,6 @@
  */
 package be.fedict.lodtools.query.resources;
 
-import be.fedict.lodtools.query.helpers.FrameReader;
 import be.fedict.lodtools.query.helpers.ModelFrame;
 import be.fedict.lodtools.query.helpers.QueryReader;
 import be.fedict.lodtools.query.helpers.RDFMediaType;
@@ -39,7 +38,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
 
-import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.repository.manager.RepositoryManager;
 
 /**
@@ -48,9 +46,8 @@ import org.eclipse.rdf4j.repository.manager.RepositoryManager;
  * @author Bart.Hanssens
  */
 @Path("/_query")
-@Produces(RDFMediaType.JSONLD)
+@Produces({RDFMediaType.JSONLD})
 public class QueryResource extends RdfResource {
-	private final FrameReader fr;
 	
 	/**
 	 * Execute a query
@@ -63,11 +60,11 @@ public class QueryResource extends RdfResource {
 	@GET
 	@Path("/{repo}/{query}")
 	@ExceptionMetered
+
 	public ModelFrame query(@PathParam("repo") String repo, @PathParam("query") String qry,
 			@Context UriInfo info) {		
-		Model m = query(repo, qry, info.getQueryParameters());
-		String f = fr.get(repo, qry);
-		return new ModelFrame(m, f);
+		return query(repo, qry, info.getQueryParameters());
+		
 	}
 	
 	/**
@@ -76,8 +73,7 @@ public class QueryResource extends RdfResource {
 	 * @param mgr
 	 * @param qr 
 	 */
-	public QueryResource(RepositoryManager mgr, QueryReader qr, FrameReader fr) {
+	public QueryResource(RepositoryManager mgr, QueryReader qr) {
 		super(mgr, qr);
-		this.fr = fr;
 	}
 }

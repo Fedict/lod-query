@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import javax.ws.rs.WebApplicationException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,23 +45,51 @@ public class QueryReader {
 	private final static Logger LOG = LoggerFactory.getLogger(QueryReader.class);
 	
 	private final String root;
+	
+	/**
+	 * Read the query or frame from text file
+	 * 
+	 * @param repoName repository name
+	 * @param qryName query name
+	 * @param suffix
+	 * @return raw query string
+	 * @throws WebApplicationException
+	 */
+	private String read(String repoName, String qryName, String suffix) {
+		StringBuffer buffer = new StringBuffer();
+		
+		Path file = Paths.get(root, repoName, qryName + "." + suffix);
+		LOG.info("Load query from {}", file);
+		try (BufferedReader r = Files.newBufferedReader(file)) {
+			r.lines().forEach(buffer::append);
+		} catch (IOException ioe) {
+			throw new WebApplicationException(ioe);
+		}
+		return buffer.toString();
+	}
+	
+	/**
+	 * Get the JSON-LD Frame
+	 * 
+	 * @param repoName repository name
+	 * @param qryName query name
+	 * @return JSON-LD frame
+	 * @throws WebApplicationException
+	 */
+	public String getFrame(String repoName, String qryName) {
+		return read(repoName, qryName, "frame");
+	}
+	
 	/**
 	 * Get the query string
 	 * 
 	 * @param repoName repository name
 	 * @param qryName query name
 	 * @return raw query string
-	 * @throws IOException 
+	 * @throws WebApplicationException
 	 */
-	public String get(String repoName, String qryName) throws IOException {
-		StringBuffer buffer = new StringBuffer();
-		
-		Path file = Paths.get(root, repoName, qryName + ".query");
-		LOG.info("Load query from {}", file);
-		try (BufferedReader r = Files.newBufferedReader(file)) {
-			r.lines().forEach(buffer::append);
-		}
-		return buffer.toString();
+	public String getQuery(String repoName, String qryName) {
+		return read(repoName, qryName, "query");
 	}
 	
 	/**

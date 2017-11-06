@@ -52,6 +52,8 @@ import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.RDFHandlerException;
 import org.eclipse.rdf4j.rio.Rio;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * RDF Writer
@@ -59,40 +61,44 @@ import org.eclipse.rdf4j.rio.Rio;
  * @author Bart.Hanssens
  */
 @Provider
-@Produces(RDFMediaType.JSONLD + ";charset=utf-8")
+@Produces(RDFMediaType.JSONLD+";charset=utf-8")
 public class JSONLDMessageBodyWriter implements MessageBodyWriter<ModelFrame> {
+	private final static Logger LOG = LoggerFactory.getLogger(QueryReader.class);
+	
 	@Override
-	public boolean isWriteable(Class<?> type, Type generic, Annotation[] antns, MediaType mt) {
-		return generic == Model.class;
+	public boolean isWriteable(Class<?> type, Type generic, 
+										Annotation[] antns, MediaType mt) {
+		return generic == ModelFrame.class;
 	}
 
 	@Override
-	public long getSize(ModelFrame mf, Class<?> type, Type generic, Annotation[] antns, MediaType mt) {
+	public long getSize(ModelFrame mf, Class<?> type, Type generic, 
+										Annotation[] antns, MediaType mt) {
 		return 0; // ignored by Jersey 2.0 anyway
 	}
 
 	@Override
-	public void writeTo(ModelFrame mf, Class<?> type, Type generic, Annotation[] antns, MediaType mt, 
-										MultivaluedMap<String, Object> mm, OutputStream out) 
+	public void writeTo(ModelFrame mf, Class<?> type, Type generic, 
+						Annotation[] antns, MediaType mt, 
+						MultivaluedMap<String, Object> mm, OutputStream out) 
 									throws IOException, WebApplicationException {
 		if (mf.getModel().isEmpty()) {
 			throw new WebApplicationException(Response.Status.NOT_FOUND);
 		}
-		
 		StringWriter w = new StringWriter();
 
 		try {
-			Rio.write(mf.getModel(), out, RDFFormat.JSONLD);
-			
+			Rio.write(mf.getModel(), w, RDFFormat.JSONLD);
+		
 			Object json = JsonUtils.fromString(w.toString());
 			Object frame = JsonUtils.fromString(mf.getFrame());
 			
 			JsonLdOptions opts = new JsonLdOptions();
-			opts.setCompactArrays(Boolean.TRUE);
-			opts.setEmbed(Boolean.TRUE);
-	
-			Map<String, Object> jsonld = JsonLdProcessor.frame(json, frame, opts); 
-			//JsonUtils.writePrettyPrint(new OutputStreamWriter(out), jsonld);
+
+			JsonUtils.writePrettyPrint(
+					new OutputStreamWriter(out),
+					JsonLdProcessor.frame(json, frame, opts));
+			
 		} catch (RDFHandlerException|JsonLdError ex) {
 			throw new WebApplicationException(ex);
 		} 

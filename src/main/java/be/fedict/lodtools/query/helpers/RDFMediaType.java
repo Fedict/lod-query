@@ -26,9 +26,8 @@
 package be.fedict.lodtools.query.helpers;
 
 import javax.ws.rs.core.MediaType;
+
 import org.eclipse.rdf4j.rio.RDFFormat;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Helper class for RDF serialization types
@@ -36,7 +35,6 @@ import org.slf4j.LoggerFactory;
  * @author Bart.Hanssens
  */
 public class RDFMediaType {
-	private final static Logger LOG = LoggerFactory.getLogger(RDFMediaType.class);
 	// can't use RDFFormat.xyz.toString(): not constant
 	public final static String JSONLD = "application/ld+json";
 	public final static String NTRIPLES = "application/n-triples";
