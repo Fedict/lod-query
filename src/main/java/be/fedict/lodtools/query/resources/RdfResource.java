@@ -28,7 +28,6 @@ package be.fedict.lodtools.query.resources;
 import be.fedict.lodtools.query.helpers.ModelFrame;
 import be.fedict.lodtools.query.helpers.QueryReader;
 import be.fedict.lodtools.query.helpers.RDFMediaType;
-import java.io.IOException;
 
 import java.text.MessageFormat;
 import java.util.HashMap;
@@ -40,7 +39,6 @@ import javax.ws.rs.core.MultivaluedMap;
 import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.ValueFactory;
-import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 
 import org.eclipse.rdf4j.model.vocabulary.DCAT;

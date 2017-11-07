@@ -54,7 +54,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * RDF Writer
+ * RDF Writer for exporting RDF to JSON-LD files using JSON-LD Framing.
  * 
  * @author Bart.Hanssens
  */
@@ -85,10 +85,11 @@ public class JSONLDMessageBodyWriter implements MessageBodyWriter<ModelFrame> {
 		}
 
 		try {
+			// get unaltered JSON-LD serialization 
 			StringWriter w = new StringWriter();
-
 			Rio.write(mf.getModel(), w, RDFFormat.JSONLD);
 		
+			// modify the output using JSON-LD Framing
 			Object json = JsonUtils.fromString(w.toString());
 			Object frame = JsonUtils.fromString(mf.getFrame());
 

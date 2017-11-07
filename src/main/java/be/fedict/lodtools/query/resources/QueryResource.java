@@ -54,8 +54,8 @@ public class QueryResource extends RdfResource {
 	 * 
 	 * @param repo repository name
 	 * @param qry query name
-	 * @param info URI context
-	 * @return
+	 * @param info HTTP context
+	 * @return RDF model + JSON-LD frame
 	 */
 	@GET
 	@Path("/{repo}/{query}")
@@ -70,8 +70,8 @@ public class QueryResource extends RdfResource {
 	/**
 	 * Constructor
 	 * 
-	 * @param mgr
-	 * @param qr 
+	 * @param mgr RDF repository manager
+	 * @param qr query and frame reader
 	 */
 	public QueryResource(RepositoryManager mgr, QueryReader qr) {
 		super(mgr, qr);

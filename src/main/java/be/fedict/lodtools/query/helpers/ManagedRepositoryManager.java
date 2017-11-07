@@ -46,6 +46,11 @@ public class ManagedRepositoryManager implements Managed {
 		mgr.shutDown();
 	}
 
+	/**
+	 * Constructor
+	 * 
+	 * @param mgr RDF repository manager
+	 */
 	public ManagedRepositoryManager(RepositoryManager mgr) {
 		this.mgr = mgr;
 		mgr.initialize();
