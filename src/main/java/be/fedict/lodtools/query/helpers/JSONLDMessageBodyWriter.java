@@ -34,10 +34,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.StringWriter;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
@@ -47,11 +46,10 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
 
-import org.eclipse.rdf4j.model.Model;
-import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.RDFHandlerException;
 import org.eclipse.rdf4j.rio.Rio;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -85,20 +83,18 @@ public class JSONLDMessageBodyWriter implements MessageBodyWriter<ModelFrame> {
 		if (mf.getModel().isEmpty()) {
 			throw new WebApplicationException(Response.Status.NOT_FOUND);
 		}
-		StringWriter w = new StringWriter();
 
 		try {
+			StringWriter w = new StringWriter();
+
 			Rio.write(mf.getModel(), w, RDFFormat.JSONLD);
 		
 			Object json = JsonUtils.fromString(w.toString());
 			Object frame = JsonUtils.fromString(mf.getFrame());
-			
-			JsonLdOptions opts = new JsonLdOptions();
 
 			JsonUtils.writePrettyPrint(
 					new OutputStreamWriter(out),
-					JsonLdProcessor.frame(json, frame, opts));
-			
+					JsonLdProcessor.frame(json, frame, new JsonLdOptions()));
 		} catch (RDFHandlerException|JsonLdError ex) {
 			throw new WebApplicationException(ex);
 		} 
