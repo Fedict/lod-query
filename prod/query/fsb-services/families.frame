@@ -1,0 +1,49 @@
+{
+	"@context": { 
+		"admstype": "http://purl.org/adms/assettype/",
+		"dcat": "http://www.w3.org/ns/dcat#",
+		"dcterms": "http://purl.org/dc/terms/",
+		"skos": "http://www.w3.org/2004/02/skos/core#",
+		"xsd": "http://www.w3.org/2001/XMLSchema#",
+		"code": { "@id": "skos:notation" },
+		"theme": { "@id": "dcat:theme" },
+		"description": { 
+			"@id": "dcterms:description", 
+			"@container": "@language"
+		},
+		"title": { 
+			"@id": "dcterms:title", 
+			"@container": "@language"
+		},
+		"label": {
+			"@id": "skos:prefLabel",
+			"@container": "@language"
+		},
+		"note": {
+			"@id": "skos:note",
+			"@container": "@language"
+		},
+		"created": {
+			"@id": "dcterms:issued",
+			"@type": "xsd:date"
+		},
+		"modified": {
+			"@id": "dcterms:modified",
+			"@type": "xsd:date"
+		}
+    },
+    "@type": "admstype:ServiceDescription",
+	"@embed": true,
+	"@explicit": true,
+	"title": {},
+	"description": {},
+	"created": {},
+	"modified": {},
+	"theme": {
+		"@type": "skos:Concept",
+		"@explicit": true,
+		"code": {},
+		"note": {},
+		"label": {}
+	}
+}

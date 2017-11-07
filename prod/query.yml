@@ -1,0 +1,12 @@
+sparqlPoint: "http://localhost:7200/"
+username: changeme
+password: changeme
+
+queryRoot: c:/data/query
+
+server:
+  requestLog:
+    appenders:
+      - type: file
+        archive: false
+        currentLogFilename: ./query.log
