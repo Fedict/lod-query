@@ -29,6 +29,7 @@ import be.fedict.lodtools.query.health.RdfStoreHealthCheck;
 import be.fedict.lodtools.query.helpers.ManagedRepositoryManager;
 import be.fedict.lodtools.query.helpers.QueryReader;
 import be.fedict.lodtools.query.helpers.JSONLDMessageBodyWriter;
+import be.fedict.lodtools.query.helpers.RDFMessageBodyWriter;
 import be.fedict.lodtools.query.resources.QueryResource;
 
 import io.dropwizard.Application;
@@ -68,7 +69,7 @@ public class App extends Application<AppConfig> {
 	
 		// RDF Serialization format
 		env.jersey().register(new JSONLDMessageBodyWriter());
-			
+		env.jersey().register(new RDFMessageBodyWriter());			
 		// Page regource
 		env.jersey().register(new QueryResource(mgr, qr));
 		

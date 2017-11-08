@@ -53,14 +53,10 @@ import org.eclipse.rdf4j.model.vocabulary.ROV;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
 
 import org.eclipse.rdf4j.query.GraphQuery;
-import org.eclipse.rdf4j.query.GraphQueryResult;
 import org.eclipse.rdf4j.query.MalformedQueryException;
-import org.eclipse.rdf4j.query.Query;
 import org.eclipse.rdf4j.query.QueryEvaluationException;
 import org.eclipse.rdf4j.query.QueryLanguage;
-import org.eclipse.rdf4j.query.QueryResult;
 import org.eclipse.rdf4j.query.QueryResults;
-import org.eclipse.rdf4j.query.TupleQuery;
 
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
@@ -74,7 +70,7 @@ import org.eclipse.rdf4j.repository.manager.RepositoryManager;
  * @author Bart.Hanssens
  */
 
-@Produces({RDFMediaType.JSONLD})
+@Produces({RDFMediaType.JSONLD, RDFMediaType.NTRIPLES, RDFMediaType.TTL})
 public abstract class RdfResource {
 	private final RepositoryManager mgr;
 	private final QueryReader qr;
@@ -133,22 +129,6 @@ public abstract class RdfResource {
 	}
 	
 	/**
-	 * Return queryresult
-	 * 
-	 * @param q query to evaluate
-	 * @return queryresult
-	 */
-	protected QueryResult evaluate(Query q) {
-		if (q instanceof TupleQuery) {
-			return ((TupleQuery) q).evaluate();
-		}
-		if (q instanceof GraphQuery) {
-			return ((GraphQuery) q).evaluate();
-		}
-		return null;
-	}
-	
-	/**
 	 * Turn HTTP parameters into query bindings
 	 * 
 	 * @param params HTTP params
@@ -187,7 +167,7 @@ public abstract class RdfResource {
 
 			bind(params).forEach((k,v) -> q.setBinding(k, v));
 			
-			Model m = setNamespaces(QueryResults.asModel((GraphQueryResult) evaluate(q)));
+			Model m = setNamespaces(QueryResults.asModel(q.evaluate()));
 			
 			return new ModelFrame(m, f);
 		} catch (RepositoryException|MalformedQueryException|QueryEvaluationException e) {

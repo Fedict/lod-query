@@ -37,6 +37,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
+import org.eclipse.rdf4j.model.Model;
 
 import org.eclipse.rdf4j.repository.manager.RepositoryManager;
 
@@ -46,9 +47,8 @@ import org.eclipse.rdf4j.repository.manager.RepositoryManager;
  * @author Bart.Hanssens
  */
 @Path("/_query")
-@Produces({RDFMediaType.JSONLD})
+@Produces({RDFMediaType.JSONLD,RDFMediaType.NTRIPLES,RDFMediaType.TTL})
 public class QueryResource extends RdfResource {
-	
 	/**
 	 * Execute a query
 	 * 
@@ -60,11 +60,27 @@ public class QueryResource extends RdfResource {
 	@GET
 	@Path("/{repo}/{query}")
 	@ExceptionMetered
-
-	public ModelFrame query(@PathParam("repo") String repo, @PathParam("query") String qry,
-			@Context UriInfo info) {		
-		return query(repo, qry, info.getQueryParameters());
-		
+	@Produces({RDFMediaType.JSONLD})
+	public ModelFrame queryJSON(@PathParam("repo") String repo, 
+			@PathParam("query") String qry, @Context UriInfo info) {		
+		return query(repo, qry, info.getQueryParameters());	
+	}
+	
+	/**
+	 * Execute a query
+	 * 
+	 * @param repo repository name
+	 * @param qry query name
+	 * @param info HTTP context
+	 * @return RDF model
+	 */
+	@GET
+	@Path("/{repo}/{query}")
+	@ExceptionMetered
+	@Produces({RDFMediaType.TTL,RDFMediaType.NTRIPLES})
+	public Model queryRDF(@PathParam("repo") String repo, 
+			@PathParam("query") String qry, @Context UriInfo info) {		
+		return query(repo, qry, info.getQueryParameters()).getModel();	
 	}
 	
 	/**

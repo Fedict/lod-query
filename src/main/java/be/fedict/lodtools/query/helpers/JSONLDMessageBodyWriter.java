@@ -85,17 +85,22 @@ public class JSONLDMessageBodyWriter implements MessageBodyWriter<ModelFrame> {
 		}
 
 		try {
-			// get unaltered JSON-LD serialization 
-			StringWriter w = new StringWriter();
-			Rio.write(mf.getModel(), w, RDFFormat.JSONLD);
+			if (mf.getFrame() != null) {
+				// get unaltered JSON-LD serialization 
+				StringWriter w = new StringWriter();
+				Rio.write(mf.getModel(), w, RDFFormat.JSONLD);
 		
-			// modify the output using JSON-LD Framing
-			Object json = JsonUtils.fromString(w.toString());
-			Object frame = JsonUtils.fromString(mf.getFrame());
+				// modify the output using JSON-LD Framing
+				Object json = JsonUtils.fromString(w.toString());
+				Object frame = JsonUtils.fromString(mf.getFrame());
 
-			JsonUtils.writePrettyPrint(
-					new OutputStreamWriter(out),
-					JsonLdProcessor.frame(json, frame, new JsonLdOptions()));
+				JsonUtils.writePrettyPrint(
+						new OutputStreamWriter(out),
+						JsonLdProcessor.frame(json, frame, new JsonLdOptions()));
+			} else {
+				// no frame required
+				Rio.write(mf.getModel(), out, RDFFormat.JSONLD);
+			}
 		} catch (RDFHandlerException|JsonLdError ex) {
 			throw new WebApplicationException(ex);
 		} 

@@ -25,85 +25,63 @@
  */
 package be.fedict.lodtools.query.helpers;
 
-import java.io.BufferedReader;
-import java.io.IOException;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.IOException;
+import java.io.OutputStream;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
+
+import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.ext.MessageBodyWriter;
+import javax.ws.rs.ext.Provider;
+
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.rio.RDFHandlerException;
+import org.eclipse.rdf4j.rio.Rio;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Read the query string from a source
+ * RDF Writer for exporting RDF to JSON-LD files using JSON-LD Framing.
  * 
  * @author Bart.Hanssens
  */
-public class QueryReader {
+@Provider
+@Produces({RDFMediaType.NTRIPLES+";charset=utf-8", RDFMediaType.TTL+";charset=utf-8"})
+public class RDFMessageBodyWriter implements MessageBodyWriter<Model> {
 	private final static Logger LOG = LoggerFactory.getLogger(QueryReader.class);
 	
-	private final String root;
-	
-	/**
-	 * Read the query or frame from text file
-	 * 
-	 * @param repoName repository name
-	 * @param qryName query name
-	 * @param suffix
-	 * @return raw query string
-	 * @throws IOException
-	 */
-	private String read(String repoName, String qryName, String suffix) throws IOException {
-		StringBuffer buffer = new StringBuffer();
-		
-		Path file = Paths.get(root, repoName, qryName + "." + suffix);
-		LOG.info("Load from {}", file);
-		try (BufferedReader r = Files.newBufferedReader(file)) {
-			r.lines().forEach(buffer::append);
-		}
-		return buffer.toString();
+	@Override
+	public boolean isWriteable(Class<?> type, Type generic, 
+										Annotation[] antns, MediaType mt) {
+		return generic == Model.class;
 	}
-	
-	/**
-	 * Get the JSON-LD Frame
-	 * 
-	 * @param repoName repository name
-	 * @param qryName query name
-	 * @return JSON-LD frame or null
-	 */
-	public String getFrame(String repoName, String qryName) {
-		try {
-			return read(repoName, qryName, "frame");
-		} catch (IOException ex) {
-			LOG.info("Could not read JSON-LD frame");
-			return null;
-		}
+
+	@Override
+	public long getSize(Model m, Class<?> type, Type generic, 
+										Annotation[] antns, MediaType mt) {
+		return 0; // ignored by Jersey 2.0 anyway
 	}
-	
-	/**
-	 * Get the query string
-	 * 
-	 * @param repoName repository name
-	 * @param qryName query name
-	 * @return raw query string
-	 * @throws WebApplicationException
-	 */
-	public String getQuery(String repoName, String qryName) {
+
+	@Override
+	public void writeTo(Model m, Class<?> type, Type generic, 
+						Annotation[] antns, MediaType mt, 
+						MultivaluedMap<String, Object> mm, OutputStream out) 
+									throws IOException, WebApplicationException {
+		if (m.isEmpty()) {
+			throw new WebApplicationException(Response.Status.NOT_FOUND);
+		}
+
 		try {
-			return read(repoName, qryName, "query");
-		} catch (IOException ex) {
+			Rio.write(m, out, RDFMediaType.getRDFFormat(mt));
+		} catch (RDFHandlerException ex) {
 			throw new WebApplicationException(ex);
-		}
-	}
-	
-	/**
-	 * Constructor
-	 * 
-	 * @param root root directory
-	 */
-	public QueryReader(String root) {
-		this.root = root;
+		} 
 	}
 }
