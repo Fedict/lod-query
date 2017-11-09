@@ -5,11 +5,18 @@
     <artifactId>lod-query</artifactId>
     <version>1.0</version>
     <packaging>jar</packaging>
+    <properties>
+	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+	<rdf4j.version>2.2.2</rdf4j.version>
+	<dw.version>1.2.0</dw.version>
+    </properties>
     <dependencies>
         <dependency>
             <groupId>io.dropwizard</groupId>
             <artifactId>dropwizard-core</artifactId>
-            <version>1.2.0</version>
+            <version>${dw.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.fasterxml.jackson.core</groupId>
@@ -20,12 +27,12 @@
         <dependency>
             <groupId>org.eclipse.rdf4j</groupId>
             <artifactId>rdf4j-repository-manager</artifactId>
-            <version>2.2.2</version>
+            <version>${rdf4j.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.rdf4j</groupId>
             <artifactId>rdf4j-rio-jsonld</artifactId>
-            <version>2.2.2</version>
+            <version>${rdf4j.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.github.jsonld-java</groupId>
@@ -44,11 +51,6 @@
             <version>0.11.1</version>
         </dependency>
     </dependencies>
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-    </properties>
     <build>
 	<plugins>
 	    <plugin>

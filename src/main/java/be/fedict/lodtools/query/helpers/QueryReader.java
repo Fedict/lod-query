@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+
 import javax.ws.rs.WebApplicationException;
 
 import org.slf4j.Logger;
@@ -92,7 +93,7 @@ public class QueryReader {
 	 */
 	public String getQuery(String repoName, String qryName) {
 		try {
-			return read(repoName, qryName, "query");
+			return read(repoName, qryName, "qr");
 		} catch (IOException ex) {
 			throw new WebApplicationException(ex);
 		}

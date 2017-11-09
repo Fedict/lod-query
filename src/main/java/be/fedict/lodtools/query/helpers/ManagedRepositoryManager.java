@@ -30,7 +30,8 @@ import io.dropwizard.lifecycle.Managed;
 import org.eclipse.rdf4j.repository.manager.RepositoryManager;
 
 /**
- *
+ * Life-cycle management helper class
+ * 
  * @author Bart.Hanssens
  */
 public class ManagedRepositoryManager implements Managed {

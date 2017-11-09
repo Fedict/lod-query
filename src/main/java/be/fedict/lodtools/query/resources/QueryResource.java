@@ -47,7 +47,6 @@ import org.eclipse.rdf4j.repository.manager.RepositoryManager;
  * @author Bart.Hanssens
  */
 @Path("/_query")
-@Produces({RDFMediaType.JSONLD,RDFMediaType.NTRIPLES,RDFMediaType.TTL})
 public class QueryResource extends RdfResource {
 	/**
 	 * Execute a query
@@ -60,7 +59,7 @@ public class QueryResource extends RdfResource {
 	@GET
 	@Path("/{repo}/{query}")
 	@ExceptionMetered
-	@Produces({RDFMediaType.JSONLD})
+	@Produces({RDFMediaType.JSONLD + ";qs=0.75"})
 	public ModelFrame queryJSON(@PathParam("repo") String repo, 
 			@PathParam("query") String qry, @Context UriInfo info) {		
 		return query(repo, qry, info.getQueryParameters());	
@@ -77,7 +76,7 @@ public class QueryResource extends RdfResource {
 	@GET
 	@Path("/{repo}/{query}")
 	@ExceptionMetered
-	@Produces({RDFMediaType.TTL,RDFMediaType.NTRIPLES})
+	@Produces({RDFMediaType.TTL + ";qs=0.25", RDFMediaType.NTRIPLES + ";qs=0.25"})
 	public Model queryRDF(@PathParam("repo") String repo, 
 			@PathParam("query") String qry, @Context UriInfo info) {		
 		return query(repo, qry, info.getQueryParameters()).getModel();	

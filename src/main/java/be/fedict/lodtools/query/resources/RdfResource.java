@@ -27,12 +27,10 @@ package be.fedict.lodtools.query.resources;
 
 import be.fedict.lodtools.query.helpers.ModelFrame;
 import be.fedict.lodtools.query.helpers.QueryReader;
-import be.fedict.lodtools.query.helpers.RDFMediaType;
 
 import java.text.MessageFormat;
 import java.util.HashMap;
 
-import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MultivaluedMap;
 
@@ -69,8 +67,6 @@ import org.eclipse.rdf4j.repository.manager.RepositoryManager;
  * 
  * @author Bart.Hanssens
  */
-
-@Produces({RDFMediaType.JSONLD, RDFMediaType.NTRIPLES, RDFMediaType.TTL})
 public abstract class RdfResource {
 	private final RepositoryManager mgr;
 	private final QueryReader qr;
@@ -98,7 +94,8 @@ public abstract class RdfResource {
 	protected Repository getRepository(String repoName) {
 		Repository repo = mgr.getRepository(repoName);
 		if (repo == null) {
-			throw new WebApplicationException(MessageFormat.format("Repo {0} not found", repo));
+			throw new WebApplicationException(
+							MessageFormat.format("Repo {0} not found", repoName));
 		}
 		if (!repo.isInitialized()) {
 			repo.initialize();
@@ -171,7 +168,7 @@ public abstract class RdfResource {
 			
 			return new ModelFrame(m, f);
 		} catch (RepositoryException|MalformedQueryException|QueryEvaluationException e) {
-			throw new WebApplicationException(e);
+			throw new WebApplicationException("Error executing query", e);
 		}
 	}
 	
