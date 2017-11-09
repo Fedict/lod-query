@@ -29,6 +29,7 @@ import com.github.jsonldjava.core.JsonLdError;
 import com.github.jsonldjava.core.JsonLdOptions;
 import com.github.jsonldjava.core.JsonLdProcessor;
 import com.github.jsonldjava.utils.JsonUtils;
+import com.google.common.base.Charsets;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -59,7 +60,7 @@ import org.slf4j.LoggerFactory;
  * @author Bart.Hanssens
  */
 @Provider
-@Produces(RDFMediaType.JSONLD+";charset=utf-8")
+@Produces(RDFMediaType.JSONLD)
 public class JSONLDMessageBodyWriter implements MessageBodyWriter<ModelFrame> {
 	private final static Logger LOG = LoggerFactory.getLogger(QueryReader.class);
 	
@@ -95,7 +96,7 @@ public class JSONLDMessageBodyWriter implements MessageBodyWriter<ModelFrame> {
 				Object frame = JsonUtils.fromString(mf.getFrame());
 
 				JsonUtils.writePrettyPrint(
-						new OutputStreamWriter(out),
+						new OutputStreamWriter(out, Charsets.UTF_8),
 						JsonLdProcessor.frame(json, frame, new JsonLdOptions()));
 			} else {
 				// no frame required

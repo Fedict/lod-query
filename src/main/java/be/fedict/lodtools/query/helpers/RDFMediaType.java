@@ -36,10 +36,11 @@ import org.eclipse.rdf4j.rio.RDFFormat;
  */
 public class RDFMediaType {
 	// can't use RDFFormat.xyz.toString(): not constant
-	public final static String JSONLD = "application/ld+json";
-	public final static String NTRIPLES = "application/n-triples";
-	public final static String TTL = "text/turtle";
-	
+	public final static String CHARSET = ";charset=utf-8";
+	public final static String JSONLD = "application/ld+json" + CHARSET;
+	public final static String NTRIPLES = "application/n-triples" + CHARSET;
+	public final static String TTL = "text/turtle" + CHARSET;
+
 	/**
 	 * Get RDF Format from mediatype
 	 * 
@@ -49,7 +50,12 @@ public class RDFMediaType {
 	public static RDFFormat getRDFFormat(MediaType mt) {
 		RDFFormat fmt;
 		
-		switch(mt.toString()) {
+		String type = mt.toString();
+		if (! type.contains(";")) {
+			type += CHARSET;
+		}
+		
+		switch(type) {
 			case RDFMediaType.NTRIPLES: fmt = RDFFormat.NTRIPLES; break;
 			case RDFMediaType.TTL: fmt = RDFFormat.TURTLE; break;
 			default: fmt = RDFFormat.JSONLD; break;

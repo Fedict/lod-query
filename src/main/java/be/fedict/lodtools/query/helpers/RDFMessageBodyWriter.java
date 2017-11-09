@@ -53,7 +53,7 @@ import org.slf4j.LoggerFactory;
  * @author Bart.Hanssens
  */
 @Provider
-@Produces({RDFMediaType.NTRIPLES+";charset=utf-8", RDFMediaType.TTL+";charset=utf-8"})
+@Produces({RDFMediaType.NTRIPLES, RDFMediaType.TTL})
 public class RDFMessageBodyWriter implements MessageBodyWriter<Model> {
 	private final static Logger LOG = LoggerFactory.getLogger(QueryReader.class);
 	
