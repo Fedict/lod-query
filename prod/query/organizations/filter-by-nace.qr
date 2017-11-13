@@ -1,0 +1,10 @@
+PREFIX rov: <http://www.w3.org/ns/regorg>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+CONSTRUCT {
+	?s rdfs:label ?o 
+} WHERE {
+	BIND (IRI(CONCAT("http://vocab.belgif.be/auth/nace2008/", ?nace, "#id")) as ?val)
+	?s rdfs:label ?o .
+	?s rov:orgActivity ?val
+}

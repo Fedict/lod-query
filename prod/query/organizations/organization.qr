@@ -1,0 +1,8 @@
+PREFIX rov: <http://www.w3.org/ns/regorg>
+
+CONSTRUCT {
+        ?s ?p ?o
+} WHERE {
+        BIND(IRI(CONCAT("http://org.belgif.be/cbe/org/", ?org, "#id")) as ?s)
+        ?s ?p ?o
+}

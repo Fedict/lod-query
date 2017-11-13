@@ -1,0 +1,10 @@
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX luc: <http://www.ontotext.com/owlim/lucene#>
+
+CONSTRUCT { 
+	?s rdfs:label ?o
+} WHERE { 
+	?o luc:myTestIndex ?fts .
+	?s ?p ?o
+}
+LIMIT 1000

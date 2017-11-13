@@ -3,8 +3,9 @@ MAINTAINER Bart Hanssens <bart.hanssens@fedict.be>
 
 RUN adduser -S dropwizard
 COPY lod-query-1.0.jar /usr/local/bin/lod-query.jar
-COPY query /home/dropwizard/
 COPY config.yml /home/dropwizard
+RUN mkdir /home/dropwizard/query 
+COPY query /home/dropwizard/query
 RUN chown -R dropwizard /home/dropwizard
 
 USER dropwizard

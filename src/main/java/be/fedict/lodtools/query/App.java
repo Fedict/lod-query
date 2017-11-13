@@ -38,12 +38,17 @@ import io.dropwizard.setup.Environment;
 import org.eclipse.rdf4j.repository.manager.RemoteRepositoryManager;
 import org.eclipse.rdf4j.repository.manager.RepositoryProvider;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Main Dropwizard web application
  * 
  * @author Bart.Hanssens
  */
 public class App extends Application<AppConfig> {
+	private final static Logger LOG = LoggerFactory.getLogger(App.class);
+	
 	@Override
 	public String getName() {
 		return "lod-query";
@@ -61,6 +66,7 @@ public class App extends Application<AppConfig> {
 				(RemoteRepositoryManager) RepositoryProvider.getRepositoryManager(endpoint);
 		if (config.getUsername() != null) {
 			mgr.setUsernameAndPassword(config.getUsername(), config.getPassword());
+			LOG.info("Using username and paswword");
 		}
 		mgr.initialize();
 		
