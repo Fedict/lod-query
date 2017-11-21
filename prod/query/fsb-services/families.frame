@@ -30,15 +30,25 @@
 		"modified": {
 			"@id": "dcterms:modified",
 			"@type": "xsd:date"
+		},
+		"landingPage": {
+			"@id": "dcat:landingPage",
+			"@type": "@id"
+		},
+		"rights": {
+			"@id": "dcterms:accessRights",
+			"@type": "@id"
 		}
-    },
-    "@type": "admstype:ServiceDescription",
+	},
+	"@type": "admstype:ServiceDescription",
 	"@embed": true,
 	"@explicit": true,
 	"title": {},
 	"description": {},
 	"created": {},
 	"modified": {},
+	"dcterms:accessRights": {},
+	"dcat:landingPage": {},
 	"theme": {
 		"@type": "skos:Concept",
 		"@explicit": true,

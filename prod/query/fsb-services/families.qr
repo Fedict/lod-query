@@ -1,4 +1,14 @@
-CONSTRUCT { ?s ?p ?o }
-WHERE {
-    ?s ?p ?o
+PREFIX dcat: <http://www.w3.org/ns/dcat#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+CONSTRUCT {
+	?s ?p ?o .
+	?theme ?q ?r
+} WHERE {
+	?s ?p ?o .
+	?s dcat:theme ?theme .
+	SERVICE <http://localhost:7200/repositories/vocabs> {
+		?theme ?q ?r
+		?theme skos:inScheme <http://id.belgium.be/auth/fsb-family#id>
+	}
 }

@@ -4,6 +4,7 @@ PREFIX luc: <http://www.ontotext.com/owlim/lucene#>
 CONSTRUCT { 
 	?s rdfs:label ?o
 } WHERE { 
+	BIND(CONCAT(?q, "*") as ?fts)
 	?o luc:myTestIndex ?fts .
 	?s ?p ?o
 }
