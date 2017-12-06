@@ -9,24 +9,28 @@
 </head>
 <body>
 <#assign q = queries>
+<#assign r = repoName>
 <main>
     <div id="container">
     <h1>List of queries</h1>
     <table>
 	<tr><th>Name</th><th>Parameters</th><th>Description</th></tr>
-	<#list q as name, str>
-	    <#assign params = []>
-	    <#assign desc = "">
-	    <#list str?split("#") as p>
-		<#if p?starts_with(" @param ")>
-		    <#assign params = params + [p?keep_after(" @param ")]>
-		<#else>
-		    <#assign desc = desc + p>
-		</#if>
-	    </#list>
-	    <tr><td>${name?remove_ending(".qr")}</td>
-		<td><#list params as param>${param}</#list></td>
-		<td>${desc}</td></tr>
+	<#list q as file, comment>
+	    <#assign name = file?remove_ending(".qr")>
+	    <#assign params = comment.get("param")>
+	    <#assign examples = comment.get("example")>
+	    <tr><td>${name}</td>
+		<td><#list params  as param>${param}</#list></td>
+		<td>${comment.description}
+		    <#if examples?has_content>
+		    Examples:
+		    <ul>
+		    <#list examples as ex>
+			<li><a href="${r}/${name}?${ex}">${ex}</a></li><br/>
+		    </#list>
+		    </ul>
+		    </#if>
+		</td></tr>
 	</#list>
     </table>
     </div>

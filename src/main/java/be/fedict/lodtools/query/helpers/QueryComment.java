@@ -59,7 +59,7 @@ public class QueryComment {
 	 * @param annot annotation code
 	 * @return list of values
 	 */
-	public List<String> getAnnotations(String annot) {
+	public List<String> get(String annot) {
 		return annots.getOrDefault(annot, Collections.emptyList());
 	}
 	

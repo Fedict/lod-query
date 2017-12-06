@@ -38,7 +38,17 @@ import java.util.Map;
  * @author Bart.Hanssens
  */
 public class QueryListView extends View {
+	private final String repoName;
 	private final Map<String,QueryComment> querydesc;
+	
+	/**
+	 * Get repository name
+	 * 
+	 * @return string
+	 */
+	public String getRepoName() {
+		return this.repoName;
+	}
 	
 	/**
 	 * Get list of queries and their descriptions
@@ -57,6 +67,7 @@ public class QueryListView extends View {
 	 */
 	public QueryListView(String repoName, Map<String,QueryComment> querydesc) {
 		super("querylist.ftl", StandardCharsets.UTF_8);
+		this.repoName = repoName;
 		this.querydesc = querydesc;
 	}
 }

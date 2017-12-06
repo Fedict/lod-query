@@ -78,6 +78,10 @@ public class QueryReader {
 	 */
 	public String[] listRepositories() {
 		File[] dirs = Paths.get(root).toFile().listFiles();
+		if (dirs == null) {
+			LOG.error("No repository directories in {}", root);
+			return new String[0];
+		}
 		return Arrays.stream(dirs).filter(File::isDirectory)
 							.map(File::getName).toArray(String[]::new);
 	}
@@ -93,6 +97,11 @@ public class QueryReader {
 		
 		File[] files = Paths.get(root, repoName).toFile()
 				.listFiles(f -> { return f.getName().endsWith(".qr"); } );
+		
+		if (files == null) {
+			LOG.error("Could not get queries for repository {}", repoName);
+			return map;
+		}
 		
 		for(File f: files) {
 			StringBuilder buffer = new StringBuilder();
@@ -133,8 +142,9 @@ public class QueryReader {
 	 */
 	public String getQuery(String repoName, String qryName) {
 		try {
-			return read(repoName, qryName + "qr");
+			return read(repoName, qryName + ".qr");
 		} catch (IOException ex) {
+			LOG.error("Couldn't read query {} for repo {}", qryName, repoName);
 			throw new WebApplicationException(ex);
 		}
 	}
