@@ -181,11 +181,7 @@ public abstract class RdfResource {
 	 * @return 
 	 */
 	protected Map<String,String> listQueries(String repoName) {
-		try {
-			return qr.listQueries(repoName);
-		} catch (IOException ioe) {
-			throw new WebApplicationException("Error listing queries", ioe);
-		}
+		return qr.listQueries(repoName);
 	}
 	
 	

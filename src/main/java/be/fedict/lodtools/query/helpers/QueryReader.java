@@ -77,9 +77,8 @@ public class QueryReader {
 	 * 
 	 * @param repoName
 	 * @return list of file names and comments
-	 * @throws java.io.IOException 
 	 */
-	public Map<String,String> listQueries(String repoName) throws IOException {
+	public Map<String,String> listQueries(String repoName) {
 		Map<String,String> map = new HashMap();
 		
 		File[] files = Paths.get(root, repoName).toFile().listFiles(file -> { 
@@ -90,6 +89,8 @@ public class QueryReader {
 			try (BufferedReader r = Files.newBufferedReader(f.toPath())) {
 				r.lines().filter(line -> line.startsWith("#"))
 						.forEach(line -> buffer.append(line));
+			} catch(IOException ioe) {
+				LOG.warn("Couldn't read file {}", f);
 			}
 			map.put(f.getName(), buffer.toString());
 		}

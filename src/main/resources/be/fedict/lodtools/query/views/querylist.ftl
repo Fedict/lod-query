@@ -13,9 +13,20 @@
     <div id="container">
     <h1>List of queries</h1>
     <table>
-	<#list q as name, desc>
-	<tr><th>${name?remove_ending(".qr")}</th>
-	    <td><#list desc?split("#") as p>${p}<br/></#list></td></tr>
+	<tr><th>Name</th><th>Parameters</th><th>Description</th></tr>
+	<#list q as name, str>
+	    <#assign params = []>
+	    <#assign desc = "">
+	    <#list str?split("#") as p>
+		<#if p?starts_with(" @param ")>
+		    <#assign params = params + [p?keep_after(" @param ")]>
+		<#else>
+		    <#assign desc = desc + p>
+		</#if>
+	    </#list>
+	    <tr><td>${name?remove_ending(".qr")}</td>
+		<td><#list params as param>${param}</#list></td>
+		<td>${desc}</td></tr>
 	</#list>
     </section>
     </div>

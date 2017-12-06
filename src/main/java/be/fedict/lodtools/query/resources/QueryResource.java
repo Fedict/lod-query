@@ -31,7 +31,6 @@ import be.fedict.lodtools.query.helpers.RDFMediaType;
 import be.fedict.lodtools.query.views.QueryListView;
 
 import com.codahale.metrics.annotation.ExceptionMetered;
-import java.util.Map;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -40,8 +39,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
-import org.eclipse.rdf4j.model.Model;
 
+import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.repository.manager.RepositoryManager;
 
 /**

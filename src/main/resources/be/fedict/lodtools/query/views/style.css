@@ -3,14 +3,12 @@ body {
 }
 table {
     background-color: white;
-
     border: solid 1pt black;
     border-collapse: collapse;
     width: 100%;
 }
 
 th, td {
-    text-align: left;
     padding: 1em;
     border: solid 1pt black;
 }
