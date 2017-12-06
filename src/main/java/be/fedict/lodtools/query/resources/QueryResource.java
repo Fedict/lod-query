@@ -28,14 +28,17 @@ package be.fedict.lodtools.query.resources;
 import be.fedict.lodtools.query.helpers.ModelFrame;
 import be.fedict.lodtools.query.helpers.QueryReader;
 import be.fedict.lodtools.query.helpers.RDFMediaType;
+import be.fedict.lodtools.query.views.QueryListView;
 
 import com.codahale.metrics.annotation.ExceptionMetered;
+import java.util.Map;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 import org.eclipse.rdf4j.model.Model;
 
@@ -48,6 +51,13 @@ import org.eclipse.rdf4j.repository.manager.RepositoryManager;
  */
 @Path("/_query")
 public class QueryResource extends RdfResource {
+	@GET
+	@Path("/{repo}")
+	@Produces({MediaType.TEXT_HTML})
+	public QueryListView queryList(@PathParam("repo") String repo) {
+		return new QueryListView(repo, listQueries(repo));
+	}
+	
 	/**
 	 * Execute a query
 	 * 

@@ -26,8 +26,11 @@
 package be.fedict.lodtools.query;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.collect.ImmutableMap;
 
 import io.dropwizard.Configuration;
+import java.util.Map;
+import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.URL;
 
@@ -37,13 +40,17 @@ import org.hibernate.validator.constraints.URL;
  */
 public class AppConfig extends Configuration {
 	@URL
+	@NotNull
 	private String sparqlPoint;
 
 	private String username;
 	private String password;
-
+	
+	@NotNull
 	private String queryRoot;
 	
+	@NotNull
+	private ImmutableMap<String, Map<String, String>> views;
 
 	@JsonProperty
 	public String getSparqlPoint() {
@@ -83,5 +90,19 @@ public class AppConfig extends Configuration {
 	@JsonProperty
 	public void setQueryRoot(String queryRoot) {
 		this.queryRoot = queryRoot;
+	}
+	
+	@JsonProperty
+	public Map<String, Map<String, String>> getViews() {
+		return this.views;
+	}
+	
+	@JsonProperty
+	public void setViews(Map<String, Map<String, String>> views) {
+		final ImmutableMap.Builder<String, Map<String, String>> builder = ImmutableMap.builder();
+		for (Map.Entry<String, Map<String, String>> entry : views.entrySet()) {
+			builder.put(entry.getKey(), ImmutableMap.copyOf(entry.getValue()));
+		}
+		this.views = builder.build();
 	}
 }

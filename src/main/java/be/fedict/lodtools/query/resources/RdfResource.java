@@ -27,9 +27,11 @@ package be.fedict.lodtools.query.resources;
 
 import be.fedict.lodtools.query.helpers.ModelFrame;
 import be.fedict.lodtools.query.helpers.QueryReader;
+import java.io.IOException;
 
 import java.text.MessageFormat;
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MultivaluedMap;
@@ -169,6 +171,20 @@ public abstract class RdfResource {
 			return new ModelFrame(m, f);
 		} catch (RepositoryException|MalformedQueryException|QueryEvaluationException e) {
 			throw new WebApplicationException("Error executing query", e);
+		}
+	}
+	
+	/**
+	 * List all available queries for a repo
+	 * 
+	 * @param repoName repository name
+	 * @return 
+	 */
+	protected Map<String,String> listQueries(String repoName) {
+		try {
+			return qr.listQueries(repoName);
+		} catch (IOException ioe) {
+			throw new WebApplicationException("Error listing queries", ioe);
 		}
 	}
 	

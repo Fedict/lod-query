@@ -25,6 +25,9 @@
  */
 package be.fedict.lodtools.query.helpers;
 
+import be.fedict.lodtools.query.helpers.ModelFrame;
+import be.fedict.lodtools.query.helpers.QueryReader;
+import be.fedict.lodtools.query.helpers.RDFMediaType;
 import com.github.jsonldjava.core.JsonLdError;
 import com.github.jsonldjava.core.JsonLdOptions;
 import com.github.jsonldjava.core.JsonLdProcessor;

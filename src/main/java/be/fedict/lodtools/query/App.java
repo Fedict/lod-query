@@ -33,7 +33,10 @@ import be.fedict.lodtools.query.helpers.RDFMessageBodyWriter;
 import be.fedict.lodtools.query.resources.QueryResource;
 
 import io.dropwizard.Application;
+import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
+import io.dropwizard.views.ViewBundle;
+import java.util.Map;
 
 import org.eclipse.rdf4j.repository.manager.RemoteRepositoryManager;
 import org.eclipse.rdf4j.repository.manager.RepositoryProvider;
@@ -52,6 +55,16 @@ public class App extends Application<AppConfig> {
 	@Override
 	public String getName() {
 		return "lod-query";
+	}
+	
+	@Override
+	public void initialize(Bootstrap<AppConfig> config) {
+		config.addBundle(new ViewBundle<AppConfig>() {
+			@Override
+			public Map<String, Map<String, String>> getViewConfiguration(AppConfig config) {
+				return config.getViews();
+			}
+		});
 	}
 	
 	@Override
@@ -75,7 +88,8 @@ public class App extends Application<AppConfig> {
 	
 		// RDF Serialization format
 		env.jersey().register(new JSONLDMessageBodyWriter());
-		env.jersey().register(new RDFMessageBodyWriter());			
+		env.jersey().register(new RDFMessageBodyWriter());
+
 		// Page regource
 		env.jersey().register(new QueryResource(mgr, qr));
 		

@@ -26,6 +26,8 @@
 package be.fedict.lodtools.query.helpers;
 
 
+import be.fedict.lodtools.query.helpers.QueryReader;
+import be.fedict.lodtools.query.helpers.RDFMediaType;
 import java.io.IOException;
 import java.io.OutputStream;
 

@@ -26,11 +26,16 @@
 package be.fedict.lodtools.query.helpers;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.ws.rs.WebApplicationException;
 
@@ -51,20 +56,44 @@ public class QueryReader {
 	 * Read the query or frame from text file
 	 * 
 	 * @param repoName repository name
-	 * @param qryName query name
-	 * @param suffix
-	 * @return raw query string
+	 * @param file file name
+	 * @return raw file content
 	 * @throws IOException
 	 */
-	private String read(String repoName, String qryName, String suffix) throws IOException {
-		StringBuffer buffer = new StringBuffer();
-		
-		Path file = Paths.get(root, repoName, qryName + "." + suffix);
+	private String read(String repoName, String file) throws IOException {		
+		Path p = Paths.get(root, repoName, file);
 		LOG.info("Load from {}", file);
-		try (BufferedReader r = Files.newBufferedReader(file)) {
-			r.lines().forEach(buffer::append);
+		
+		StringBuilder buffer = new StringBuilder();
+		try (BufferedReader r = Files.newBufferedReader(p)) {
+			r.lines().filter(line -> !line.startsWith("#"))
+					.forEach(buffer::append);
 		}
 		return buffer.toString();
+	}
+	
+	/**
+	 * List all queries for a specific repository with their comments (if any)
+	 * 
+	 * @param repoName
+	 * @return list of file names and comments
+	 * @throws java.io.IOException 
+	 */
+	public Map<String,String> listQueries(String repoName) throws IOException {
+		Map<String,String> map = new HashMap();
+		
+		File[] files = Paths.get(root, repoName).toFile().listFiles(file -> { 
+										return file.getName().endsWith(".qr"); 
+										} );
+		for(File f: files) {
+			StringBuilder buffer = new StringBuilder();
+			try (BufferedReader r = Files.newBufferedReader(f.toPath())) {
+				r.lines().filter(line -> line.startsWith("#"))
+						.forEach(line -> buffer.append(line));
+			}
+			map.put(f.getName(), buffer.toString());
+		}
+		return map;
 	}
 	
 	/**
@@ -76,7 +105,7 @@ public class QueryReader {
 	 */
 	public String getFrame(String repoName, String qryName) {
 		try {
-			return read(repoName, qryName, "frame");
+			return read(repoName, qryName + ".frame");
 		} catch (IOException ex) {
 			LOG.info("Could not read JSON-LD frame");
 			return null;
@@ -93,7 +122,7 @@ public class QueryReader {
 	 */
 	public String getQuery(String repoName, String qryName) {
 		try {
-			return read(repoName, qryName, "qr");
+			return read(repoName, qryName + "qr");
 		} catch (IOException ex) {
 			throw new WebApplicationException(ex);
 		}
