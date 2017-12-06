@@ -25,39 +25,35 @@
  */
 package be.fedict.lodtools.query.views;
 
-import be.fedict.lodtools.query.helpers.QueryComment;
 import io.dropwizard.views.View;
 
 import java.nio.charset.StandardCharsets;
-
-import java.util.Map;
 
 /**
  * HTML view for query lists
  * 
  * @author Bart.Hanssens
  */
-public class QueryListView extends View {
-	private final Map<String,QueryComment> querydesc;
+public class RepositoryListView extends View {
+	private final String[] repos;
 	
 	/**
-	 * Get list of queries and their descriptions
+	 * Get list of queryable repositories
 	 * 
-	 * @return 
+	 * @return array of repositories
 	 */
-	public Map<String,QueryComment> getQueries() {
-		return this.querydesc;
+	public String[] getRepositories() {
+		return this.repos;
 	}
 	
 	/** 
 	 * Constructor
 	 * 
-	 * @param repoName repository name
-	 * @param querydesc query descriptions
+	 * @param repos list of repositories
 	 */
-	public QueryListView(String repoName, Map<String,QueryComment> querydesc) {
-		super("querylist.ftl", StandardCharsets.UTF_8);
-		this.querydesc = querydesc;
+	public RepositoryListView(String[] repos) {
+		super("repolist.ftl", StandardCharsets.UTF_8);
+		this.repos = repos;
 	}
 }
 

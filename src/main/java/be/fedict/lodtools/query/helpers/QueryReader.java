@@ -32,9 +32,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.ws.rs.WebApplicationException;
@@ -73,17 +72,28 @@ public class QueryReader {
 	}
 	
 	/**
+	 * Get list of repository names
+	 * 
+	 * @return array of names
+	 */
+	public String[] listRepositories() {
+		File[] dirs = Paths.get(root).toFile().listFiles();
+		return Arrays.stream(dirs).filter(File::isDirectory)
+							.map(File::getName).toArray(String[]::new);
+	}
+	
+	/**
 	 * List all queries for a specific repository with their comments (if any)
 	 * 
 	 * @param repoName
 	 * @return list of file names and comments
 	 */
-	public Map<String,String> listQueries(String repoName) {
-		Map<String,String> map = new HashMap();
+	public Map<String,QueryComment> listQueries(String repoName) {
+		Map<String,QueryComment> map = new HashMap<>();
 		
-		File[] files = Paths.get(root, repoName).toFile().listFiles(file -> { 
-										return file.getName().endsWith(".qr"); 
-										} );
+		File[] files = Paths.get(root, repoName).toFile()
+				.listFiles(f -> { return f.getName().endsWith(".qr"); } );
+		
 		for(File f: files) {
 			StringBuilder buffer = new StringBuilder();
 			try (BufferedReader r = Files.newBufferedReader(f.toPath())) {
@@ -92,7 +102,7 @@ public class QueryReader {
 			} catch(IOException ioe) {
 				LOG.warn("Couldn't read file {}", f);
 			}
-			map.put(f.getName(), buffer.toString());
+			map.put(f.getName(), new QueryComment(buffer.toString()));
 		}
 		return map;
 	}

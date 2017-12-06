@@ -26,8 +26,8 @@
 package be.fedict.lodtools.query.resources;
 
 import be.fedict.lodtools.query.helpers.ModelFrame;
+import be.fedict.lodtools.query.helpers.QueryComment;
 import be.fedict.lodtools.query.helpers.QueryReader;
-import java.io.IOException;
 
 import java.text.MessageFormat;
 import java.util.HashMap;
@@ -175,15 +175,23 @@ public abstract class RdfResource {
 	}
 	
 	/**
-	 * List all available queries for a repo
+	 * List all available repositories
 	 * 
-	 * @param repoName repository name
-	 * @return 
+	 * @return array of repository names
 	 */
-	protected Map<String,String> listQueries(String repoName) {
-		return qr.listQueries(repoName);
+	protected String[] listRepositories() {
+		return qr.listRepositories();
 	}
 	
+	/**
+	 * List all available queries for a repository and their descriptions
+	 * 
+	 * @param repoName repository name
+	 * @return map of queries and descriptions
+	 */
+	protected Map<String,QueryComment> listQueries(String repoName) {
+		return qr.listQueries(repoName);
+	}
 	
 	/**
 	 * Constructor

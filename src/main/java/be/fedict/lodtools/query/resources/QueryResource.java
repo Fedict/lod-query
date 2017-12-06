@@ -29,6 +29,7 @@ import be.fedict.lodtools.query.helpers.ModelFrame;
 import be.fedict.lodtools.query.helpers.QueryReader;
 import be.fedict.lodtools.query.helpers.RDFMediaType;
 import be.fedict.lodtools.query.views.QueryListView;
+import be.fedict.lodtools.query.views.RepositoryListView;
 
 import com.codahale.metrics.annotation.ExceptionMetered;
 
@@ -50,6 +51,25 @@ import org.eclipse.rdf4j.repository.manager.RepositoryManager;
  */
 @Path("/_query")
 public class QueryResource extends RdfResource {
+	
+	/**
+	 * Show the list of available repositories
+	 * 
+	 * @return list of repositories
+	 */
+	@GET
+	@Path("/")
+	@Produces({MediaType.TEXT_HTML})
+	public RepositoryListView repoList() {
+		return new RepositoryListView(listRepositories());
+	}
+	
+	/**
+	 * Show the list of available queries
+	 * 
+	 * @param repo repository name
+	 * @return list of queries
+	 */
 	@GET
 	@Path("/{repo}")
 	@Produces({MediaType.TEXT_HTML})

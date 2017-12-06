@@ -28,7 +28,7 @@
 		<td><#list params as param>${param}</#list></td>
 		<td>${desc}</td></tr>
 	</#list>
-    </section>
+    </table>
     </div>
 </main>
 </body>

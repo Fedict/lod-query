@@ -26,7 +26,6 @@
 package be.fedict.lodtools.query.helpers;
 
 import be.fedict.lodtools.query.helpers.ModelFrame;
-import be.fedict.lodtools.query.helpers.QueryReader;
 import be.fedict.lodtools.query.helpers.RDFMediaType;
 import com.github.jsonldjava.core.JsonLdError;
 import com.github.jsonldjava.core.JsonLdOptions;
@@ -54,8 +53,6 @@ import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.RDFHandlerException;
 import org.eclipse.rdf4j.rio.Rio;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * RDF Writer for exporting RDF to JSON-LD files using JSON-LD Framing.
@@ -65,8 +62,6 @@ import org.slf4j.LoggerFactory;
 @Provider
 @Produces(RDFMediaType.JSONLD)
 public class JSONLDMessageBodyWriter implements MessageBodyWriter<ModelFrame> {
-	private final static Logger LOG = LoggerFactory.getLogger(QueryReader.class);
-	
 	@Override
 	public boolean isWriteable(Class<?> type, Type generic, 
 										Annotation[] antns, MediaType mt) {

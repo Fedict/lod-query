@@ -23,46 +23,82 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
 package be.fedict.lodtools.query.helpers;
 
-import org.eclipse.rdf4j.model.Model;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
- * Helper object for passing RDF model + JSON-LD Frame
+ * Structured (lowercase annotations like @param) query comments helper class
  * 
  * @author Bart.Hanssens
  */
-public class ModelFrame {
-	private final Model model;
-	private final String frame;
+public class QueryComment {
+	private final static Pattern P = Pattern.compile(" ?@([a-z]+) (.+)");
+	private final String desc;
+	
+	private final Map<String,List<String>> annots = new HashMap();
 	
 	/**
-	 * Get triples in RDF model
+	 * Get description
 	 * 
-	 * @return model
+	 * @return description
 	 */
-	public Model getModel() {
-		return model;
+	public String getDescription() {
+		return this.desc;
 	}
 	
 	/**
-	 * Get JSON-LD Frame
+	 * Get a list of values for a given annotation, if any
 	 * 
-	 * @return 
+	 * @param annot annotation code
+	 * @return list of values
 	 */
-	public String getFrame() {
-		return frame;
+	public List<String> getAnnotations(String annot) {
+		return annots.getOrDefault(annot, Collections.emptyList());
+	}
+	
+	/**
+	 * Add a annotation value 
+	 * 
+	 * @param annot
+	 * @param value 
+	 */
+	private void add(String annot, String value) {
+		List<String> lst = annots.get(annot);
+		if (lst == null) {
+			lst = new ArrayList<>();
+			annots.put(annot,lst);
+		}
+		lst.add(value);
 	}
 	
 	/**
 	 * Constructor
 	 * 
-	 * @param model RDF model
-	 * @param frame JSON-LD frame
+	 * @param text 
 	 */
-	public ModelFrame(Model model, String frame) {
-		this.model = model;
-		this.frame = frame;
+	public QueryComment(String text) {
+		if (text != null) {
+			StringBuilder sb = new StringBuilder(text.length());
+			String[] splits = text.split("#");
+			
+			for(String s: splits) {
+				Matcher m = P.matcher(s);
+				if (m.matches()) {
+					add(m.group(1), m.group(2));
+				} else {
+					sb.append(s);
+				}
+			}
+			this.desc = sb.toString();
+		} else {
+			this.desc = "";
+		}
 	}
 }

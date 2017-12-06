@@ -1,6 +1,9 @@
-body {
-    background-color: lightgrey;
+
+h3 {
+    background-color: lightgray;
+    border: solid 1pt black;
 }
+
 table {
     background-color: white;
     border: solid 1pt black;
