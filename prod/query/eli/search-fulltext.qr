@@ -1,0 +1,19 @@
+# Search for legal expression, limited to 1000 results
+#
+# @param q
+# @example q=hergebruik
+
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX eli: <http://data.europa.eu/eli/ontology#>
+PREFIX luc: <http://www.ontotext.com/owlim/lucene#>
+
+CONSTRUCT { 
+	?s eli:title ?o .
+	?s eli:realises ?r
+} WHERE { 
+	BIND(CONCAT(?q, "*") as ?fts)
+	?o luc:eliIndex ?fts .
+	?s eli:title ?o .
+	?s eli:realises ?r
+}
+LIMIT 1000

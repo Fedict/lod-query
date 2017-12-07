@@ -1,0 +1,12 @@
+# Get legal resource, legal expression or legal format by ELI
+#
+# @param org
+# @example eli=ordonnantie/1992/12/03/1993031426
+# @example eli=ordonnantie/1992/12/03/1993031426/justel
+
+CONSTRUCT {
+        ?s ?p ?o
+} WHERE {
+        BIND(IRI(CONCAT("http://www.ejustice.just.fgov.be/eli/", ?eli)) as ?s)
+        ?s ?p ?o
+}
