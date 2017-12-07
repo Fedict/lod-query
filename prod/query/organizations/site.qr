@@ -1,3 +1,9 @@
+# Get organization sites by BCE site number
+# (dots in the number must be replaced by underscores)
+#
+# @param site
+# @example site=2_146_817_361
+
 PREFIX rov: <http://www.w3.org/ns/regorg>
 
 CONSTRUCT {

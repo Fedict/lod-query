@@ -1,7 +1,7 @@
-
-h3 {
+h1 {
     background-color: lightgray;
     border: solid 1pt black;
+    padding: 0.5em;
 }
 
 table {
@@ -11,7 +11,15 @@ table {
     width: 100%;
 }
 
+th {
+    background-color: lightgray;
+}
+
 th, td {
-    padding: 1em;
+    padding: 0.5em;
     border: solid 1pt black;
+}
+
+ul {
+    
 }

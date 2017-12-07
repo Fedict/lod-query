@@ -1,3 +1,9 @@
+# Get registered organization by BCE organization number
+# (dots in the number must be replaced by underscores)
+#
+# @param org
+# @example org=0367_302_178
+
 PREFIX rov: <http://www.w3.org/ns/regorg>
 
 CONSTRUCT {

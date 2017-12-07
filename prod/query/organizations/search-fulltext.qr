@@ -1,3 +1,8 @@
+# Search for organizations by name
+#
+# @param q
+# @example q=Federale
+
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX luc: <http://www.ontotext.com/owlim/lucene#>
 

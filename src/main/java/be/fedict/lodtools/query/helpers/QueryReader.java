@@ -33,8 +33,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 import javax.ws.rs.WebApplicationException;
 
@@ -72,7 +72,7 @@ public class QueryReader {
 	}
 	
 	/**
-	 * Get list of repository names
+	 * Get ordered list of repository names
 	 * 
 	 * @return array of names
 	 */
@@ -83,17 +83,18 @@ public class QueryReader {
 			return new String[0];
 		}
 		return Arrays.stream(dirs).filter(File::isDirectory)
-							.map(File::getName).toArray(String[]::new);
+							.map(File::getName).sorted().toArray(String[]::new);
 	}
 	
 	/**
-	 * List all queries for a specific repository with their comments (if any)
+	 * List all queries for a specific repository as an ordered map,
+	 * with the filename as key and the structured comment as value
 	 * 
 	 * @param repoName
 	 * @return list of file names and comments
 	 */
 	public Map<String,QueryComment> listQueries(String repoName) {
-		Map<String,QueryComment> map = new HashMap<>();
+		Map<String,QueryComment> map = new TreeMap<>();
 		
 		File[] files = Paths.get(root, repoName).toFile()
 				.listFiles(f -> { return f.getName().endsWith(".qr"); } );
