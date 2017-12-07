@@ -1,9 +1,9 @@
-# List organizations by NACE 2008 activity code
+# List organizations by NACE 2008 activity code, limited to 1000 results
 #
 # @param nace
 # @example nace=84119
 
-PREFIX rov: <http://www.w3.org/ns/regorg>
+PREFIX rov: <http://www.w3.org/ns/regorg#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
 CONSTRUCT {
@@ -13,3 +13,4 @@ CONSTRUCT {
 	?s rdfs:label ?o .
 	?s rov:orgActivity ?val
 }
+LIMIT 1000
