@@ -4,8 +4,6 @@
 # @param reg
 # @example reg=0367_302_178
 
-PREFIX rov: <http://www.w3.org/ns/regorg>
-
 CONSTRUCT {
 	?s ?p ?o
 } WHERE {

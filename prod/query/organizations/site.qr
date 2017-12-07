@@ -4,8 +4,6 @@
 # @param site
 # @example site=2_146_817_361
 
-PREFIX rov: <http://www.w3.org/ns/regorg>
-
 CONSTRUCT {
 	?s ?p ?o
 } WHERE {

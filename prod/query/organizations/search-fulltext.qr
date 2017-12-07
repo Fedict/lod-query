@@ -10,7 +10,7 @@ CONSTRUCT {
 	?s rdfs:label ?o
 } WHERE { 
 	BIND(CONCAT(?q, "*") as ?fts)
-	?o luc:myTestIndex ?fts .
+	?o luc:orgIndex ?fts .
 	?s ?p ?o
 }
 LIMIT 1000

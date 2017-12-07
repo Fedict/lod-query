@@ -9,4 +9,16 @@ server:
     appenders:
       - type: file
         archive: false
-        currentLogFilename: ./query.log
+        currentLogFilename: ./request.log
+
+logging:
+  level: INFO
+  appenders:
+    - type: file
+      archive: false
+      currentLogFilename: ./application.log
+      
+views:
+    .ftl:
+        template_exception_handler: rethrow
+        output_encoding: utf-8
