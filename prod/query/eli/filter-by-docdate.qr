@@ -1,0 +1,7 @@
+# List by date (YYYY-MM-DD) and optionally legal type
+
+# @param date (YYYY-MM-DD)
+# @param type [CONST,LAW,ORD,DECREE]
+# @example date=1992-12-03
+# @example date=1992-12-03&type=DECREE
+

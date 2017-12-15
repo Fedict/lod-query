@@ -1,6 +1,6 @@
 # Get legal resource, legal expression or legal format by ELI
 #
-# @param org
+# @param eli
 # @example eli=ordonnantie/1992/12/03/1993031426
 # @example eli=ordonnantie/1992/12/03/1993031426/justel
 

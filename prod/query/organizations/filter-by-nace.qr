@@ -1,6 +1,6 @@
 # List organizations by NACE 2008 activity code, limited to 1000 results
 #
-# @param nace
+# @param nace (numeric code)
 # @example nace=84119
 
 PREFIX rov: <http://www.w3.org/ns/regorg#>

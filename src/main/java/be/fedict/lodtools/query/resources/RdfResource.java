@@ -51,17 +51,20 @@ import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.model.vocabulary.ROV;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
+import org.eclipse.rdf4j.query.BindingSet;
 
 import org.eclipse.rdf4j.query.GraphQuery;
 import org.eclipse.rdf4j.query.MalformedQueryException;
 import org.eclipse.rdf4j.query.QueryEvaluationException;
 import org.eclipse.rdf4j.query.QueryLanguage;
 import org.eclipse.rdf4j.query.QueryResults;
+import org.eclipse.rdf4j.query.impl.MapBindingSet;
 
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.RepositoryException;
 import org.eclipse.rdf4j.repository.manager.RepositoryManager;
+import org.eclipse.rdf4j.repository.sparql.query.QueryStringUtil;
 
 
 /**
@@ -162,10 +165,14 @@ public abstract class RdfResource {
 		String qry = qr.getQuery(repoName, qryName);
 			
 		try (RepositoryConnection conn = repo.getConnection()) {
-			GraphQuery q = conn.prepareGraphQuery(QueryLanguage.SPARQL, qry);
-
-			bind(params).forEach((k,v) -> q.setBinding(k, v));
+			/* MapBindingSet bs = new MapBindingSet();
+			bind(params).forEach((k,v) -> bs.addBinding(k, v));
+			String parsed = QueryStringUtil.getGraphQueryString(qry, bs); */
 			
+			GraphQuery q = conn.prepareGraphQuery(QueryLanguage.SPARQL, qry);
+			
+			bind(params).forEach((k,v) -> q.setBinding(k, v));
+	
 			Model m = setNamespaces(QueryResults.asModel(q.evaluate()));
 			
 			return new ModelFrame(m, f);

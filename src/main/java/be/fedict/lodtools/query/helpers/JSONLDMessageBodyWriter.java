@@ -25,13 +25,10 @@
  */
 package be.fedict.lodtools.query.helpers;
 
-import be.fedict.lodtools.query.helpers.ModelFrame;
-import be.fedict.lodtools.query.helpers.RDFMediaType;
 import com.github.jsonldjava.core.JsonLdError;
 import com.github.jsonldjava.core.JsonLdOptions;
 import com.github.jsonldjava.core.JsonLdProcessor;
 import com.github.jsonldjava.utils.JsonUtils;
-import com.google.common.base.Charsets;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -40,6 +37,8 @@ import java.io.StringWriter;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+
+import java.nio.charset.StandardCharsets;
 
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
@@ -94,7 +93,7 @@ public class JSONLDMessageBodyWriter implements MessageBodyWriter<ModelFrame> {
 				Object frame = JsonUtils.fromString(mf.getFrame());
 
 				JsonUtils.writePrettyPrint(
-						new OutputStreamWriter(out, Charsets.UTF_8),
+						new OutputStreamWriter(out, StandardCharsets.UTF_8),
 						JsonLdProcessor.frame(json, frame, new JsonLdOptions()));
 			} else {
 				// no frame required

@@ -1,7 +1,7 @@
 # Get organization registration by BCE organization number
 # (dots in the number must be replaced by underscores)
 #
-# @param reg
+# @param reg (code)
 # @example reg=0367_302_178
 
 CONSTRUCT {

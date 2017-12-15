@@ -1,6 +1,6 @@
 # Search for legal expression, limited to 1000 results
 #
-# @param q
+# @param q (string)
 # @example q=hergebruik
 
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>

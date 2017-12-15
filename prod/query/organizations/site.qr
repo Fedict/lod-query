@@ -1,7 +1,7 @@
 # Get organization sites by BCE site number
 # (dots in the number must be replaced by underscores)
 #
-# @param site
+# @param site (code)
 # @example site=2_146_817_361
 
 CONSTRUCT {

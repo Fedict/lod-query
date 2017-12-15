@@ -1,0 +1,13 @@
+# Get SKOS resource by ID
+#
+# @param id
+# @example id=fsb-family
+# @example id=fsb-family/S170-EurTransBelServices
+
+CONSTRUCT {
+        ?s ?p ?o
+} WHERE {
+        BIND(IRI(CONCAT("http://id.belgium.be/auth/", ?id, "#id")) as ?s)
+        ?s ?p ?o
+}
+
