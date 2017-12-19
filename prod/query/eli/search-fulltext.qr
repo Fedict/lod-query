@@ -1,4 +1,6 @@
-# Search for legal expression, limited to 1000 results
+# Search for legal expression, limited to 1000 results.
+# Single "word" will be turned into a lucene wildcard search (word*)
+# Phrases will turned into lucene quoted search ("this is a phrase")
 #
 # @param q (string)
 # @example q=hergebruik
@@ -7,13 +9,15 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX eli: <http://data.europa.eu/eli/ontology#>
 PREFIX luc: <http://www.ontotext.com/owlim/lucene#>
 
-CONSTRUCT { 
-	?s eli:title ?o .
-	?s eli:realises ?r
-} WHERE { 
-	BIND(CONCAT(?q, "*") as ?fts)
-	?o luc:eliIndex ?fts .
-	?s eli:title ?o .
-	?s eli:realises ?r
+CONSTRUCT {
+    ?s eli:title ?o .
+    ?s eli:realises ?r
+} WHERE {
+    BIND(
+	IF(CONTAINS(?q, " "), CONCAT("\"", ?q, "\""), CONCAT(?q, "*"))
+     as ?fts) .
+    ?o luc:eliIndex ?fts .
+    ?s eli:title ?o .
+    ?s eli:realises ?r
 }
 LIMIT 1000

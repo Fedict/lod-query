@@ -1,7 +1,18 @@
 # List by date (YYYY-MM-DD) and optionally legal type
-
+#
 # @param date (YYYY-MM-DD)
 # @param type [CONST,LAW,ORD,DECREE]
-# @example date=1992-12-03
-# @example date=1992-12-03&type=DECREE
+# @example date=1992-12-14
+# @example date=1992-12-14&type=DECREE
 
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+CONSTRUCT { ?s ?p ?o }
+WHERE {
+    BIND(IRI(CONCAT("http://vocab.belgif.be/auth/legal-type/", ?type, "#id") .
+    BIND(STRDT(?date, xsd:date) as ?docdate) .
+    ?s ?p ?o .
+    ?s <http://data.europa.eu/eli/ontology#date_document> ?docdate .
+    ?s <http://data.europa.eu/eli/ontology#type_document> ?doctype
+}
+LIMIT 1000
