@@ -165,13 +165,14 @@ public abstract class RdfResource {
 		String qry = qr.getQuery(repoName, qryName);
 			
 		try (RepositoryConnection conn = repo.getConnection()) {
-			/* MapBindingSet bs = new MapBindingSet();
+			// Replace params here for performance (mostly within glue BIND's) 
+			MapBindingSet bs = new MapBindingSet();
 			bind(params).forEach((k,v) -> bs.addBinding(k, v));
-			String parsed = QueryStringUtil.getGraphQueryString(qry, bs); */
+			qry = QueryStringUtil.getGraphQueryString(qry, bs);
 			
 			GraphQuery q = conn.prepareGraphQuery(QueryLanguage.SPARQL, qry);
 			
-			bind(params).forEach((k,v) -> q.setBinding(k, v));
+			//bind(params).forEach((k,v) -> q.setBinding(k, v));
 	
 			Model m = setNamespaces(QueryResults.asModel(q.evaluate()));
 			

@@ -2,7 +2,7 @@ FROM openjdk:8-jre-alpine
 MAINTAINER Bart Hanssens <bart.hanssens@fedict.be>
 
 RUN adduser -S dropwizard
-COPY lod-query-1.0.jar /usr/local/bin/lod-query.jar
+COPY lod-query-1.1.2.jar /usr/local/bin/lod-query.jar
 COPY config.yml /home/dropwizard
 RUN mkdir /home/dropwizard/query 
 COPY query /home/dropwizard/query

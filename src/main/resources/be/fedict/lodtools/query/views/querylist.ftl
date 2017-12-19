@@ -23,7 +23,10 @@
 	    <#assign params = comment.get("param")>
 	    <#assign examples = comment.get("example")>
 	    <tr><td>${name}</td>
-		<td><#list params  as param>${param}</#list></td>
+		<td><ul>
+		    <#list params  as param><li>${param}<li></#list>
+		    </ul>
+		</td>
 		<td><ul>
 		    <#if examples?has_content>
 		    <#list examples as ex>
