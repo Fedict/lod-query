@@ -24,7 +24,7 @@
 	    <#assign examples = comment.get("example")>
 	    <tr><td>${name}</td>
 		<td><ul>
-		    <#list params  as param><li>${param}<li></#list>
+		    <#list params  as param><li>${param}</li></#list>
 		    </ul>
 		</td>
 		<td><ul>
