@@ -9,7 +9,9 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 
 CONSTRUCT { ?s ?p ?o }
 WHERE {
-    BIND(IRI(CONCAT("http://vocab.belgif.be/auth/legal-type/", ?type, "#id") .
+    BIND(
+	IRI(CONCAT("http://vocab.belgif.be/auth/legal-type/", ?type, "#id"))
+     as ?doctype) .
     BIND(STRDT(?date, xsd:date) as ?docdate) .
     ?s ?p ?o .
     ?s <http://data.europa.eu/eli/ontology#date_document> ?docdate .
