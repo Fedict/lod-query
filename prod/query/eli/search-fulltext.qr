@@ -11,13 +11,13 @@ PREFIX luc: <http://www.ontotext.com/owlim/lucene#>
 
 CONSTRUCT {
     ?s eli:title ?o .
-    ?s eli:realises ?r
+    ?s eli:realizes ?r
 } WHERE {
     BIND(
 	IF(CONTAINS(?q, " "), CONCAT("\"", ?q, "\""), CONCAT(?q, "*"))
      as ?fts) .
     ?o luc:eliIndex ?fts .
     ?s eli:title ?o .
-    ?s eli:realises ?r
+    ?s eli:realizes ?r
 }
 LIMIT 1000

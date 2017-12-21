@@ -19,7 +19,7 @@ WHERE {
     ?s ?p ?o .
     ?s eli:date_document ?docdate .
     ?s eli:type_document ?doctype .
-    ?s eli:is_realised_by ?r .
+    ?s eli:is_realized_by ?r .
     ?r eli:title ?t .
     ?t luc:eliIndex ?fts
 }
