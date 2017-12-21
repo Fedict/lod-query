@@ -1,21 +1,27 @@
-# List by date (YYYY-MM-DD) and optionally legal type
+# Match by date (YYYY-MM-DD),type and title
 #
 # @param date (YYYY-MM-DD)
 # @param type [CONST,LAW,ORD,DECREE]
-# @example date=1992-12-14
-# @example date=1992-12-14&type=DECREE
+# @param q (string)
+# @example date=2015-06-29&type=DECREE?q=hergebruik
 
 PREFIX eli: <http://data.europa.eu/eli/ontology#>
+PREFIX luc: <http://www.ontotext.com/owlim/lucene#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 
 CONSTRUCT { ?s ?p ?o }
 WHERE {
     BIND(
 	IRI(CONCAT("http://vocab.belgif.be/auth/legal-type/", ?type, "#id"))
-     as ?doctype) .
+	 as ?doctype) .
     BIND(STRDT(?date, xsd:date) as ?docdate) .
+    BIND(CONCAT("\"", ?q, "\"") as ?fts) .
     ?s ?p ?o .
     ?s eli:date_document ?docdate .
-    ?s eli:type_document ?doctype
+    ?s eli:type_document ?doctype .
+    ?s eli:is_realised_by ?r .
+    ?r eli:title ?t .
+    ?t luc:eliIndex ?fts
 }
 LIMIT 1000
+
