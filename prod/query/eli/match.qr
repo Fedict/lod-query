@@ -3,7 +3,7 @@
 # @param date (YYYY-MM-DD)
 # @param type [CONST,LAW,ORD,DECREE]
 # @param q (string)
-# @example date=2015-06-29&type=DECREE?q=hergebruik
+# @example date=2015-06-29&type=DECREE&q=hergebruik
 
 PREFIX eli: <http://data.europa.eu/eli/ontology#>
 PREFIX luc: <http://www.ontotext.com/owlim/lucene#>
