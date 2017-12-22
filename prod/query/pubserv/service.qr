@@ -1,0 +1,13 @@
+# Get public service, framework or address by ID 
+#
+# @param serv 
+# @example id=service/20
+# @example id=addr/0d7790b61ed19d9c95b5130c35fe8e698312645c
+# @example id=framework/50030/3
+
+CONSTRUCT {
+        ?s ?p ?o
+} WHERE {
+	BIND(IRI(CONCAT("http://pubserv.belgif.be/", ?id, "#id")) as ?s) .
+	?s ?p ?o
+}

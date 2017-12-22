@@ -1,0 +1,18 @@
+# Search for services, limited to 1000 results.
+# Single "word" will be turned into a lucene wildcard search (word*)
+# Phrases will turned into lucene quoted search ("this is a phrase")
+#
+# @param q (string)
+# @example q=diamant
+
+PREFIX luc: <http://www.ontotext.com/owlim/lucene#>
+
+CONSTRUCT { ?s ?p ?o } 
+WHERE {
+	BIND(
+		IF(CONTAINS(?q, " "), CONCAT("\"", ?q, "\""), CONCAT(?q, "*"))
+	 as ?fts) .
+	?s ?p ?o .
+	?o luc:pubservIndex ?fts .
+}
+LIMIT 1000

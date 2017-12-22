@@ -5,8 +5,8 @@
 # @example eli=ordonnantie/1992/12/03/1993031426/justel
 
 CONSTRUCT {
-        ?s ?p ?o
+	?s ?p ?o
 } WHERE {
-        BIND(IRI(CONCAT("http://www.ejustice.just.fgov.be/eli/", ?eli)) as ?s)
-        ?s ?p ?o
+	BIND(IRI(CONCAT("http://www.ejustice.just.fgov.be/eli/", ?eli)) as ?s)
+	?s ?p ?o
 }

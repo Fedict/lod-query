@@ -9,19 +9,20 @@ PREFIX eli: <http://data.europa.eu/eli/ontology#>
 PREFIX luc: <http://www.ontotext.com/owlim/lucene#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 
-CONSTRUCT { ?s ?p ?o }
-WHERE {
-    BIND(
-	IRI(CONCAT("http://vocab.belgif.be/auth/legal-type/", ?type, "#id"))
+CONSTRUCT { 
+	?s ?p ?o 
+} WHERE {
+	BIND(
+		IRI(CONCAT("http://vocab.belgif.be/auth/legal-type/", ?type, "#id"))
 	 as ?doctype) .
-    BIND(STRDT(?date, xsd:date) as ?docdate) .
-    BIND(CONCAT("\"", ?q, "\"") as ?fts) .
-    ?s ?p ?o .
-    ?s eli:date_document ?docdate .
-    ?s eli:type_document ?doctype .
-    ?s eli:is_realized_by ?r .
-    ?r eli:title ?t .
-    ?t luc:eliIndex ?fts
+	BIND(STRDT(?date, xsd:date) as ?docdate) .
+	BIND(CONCAT("\"", ?q, "\"") as ?fts) .
+	?s ?p ?o .
+	?s eli:date_document ?docdate .
+	?s eli:type_document ?doctype .
+	?s eli:is_realized_by ?r .
+	?r eli:title ?t .
+	?t luc:eliIndex ?fts
 }
 LIMIT 1000
 
