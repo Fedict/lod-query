@@ -7,6 +7,8 @@
 ## Why this tool
 
 - Abstract/hide SPARQL API
+- Re-users don't have to know SPARQL
+- Limit queries to "safe" queries
 
 ---
 
