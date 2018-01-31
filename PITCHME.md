@@ -18,6 +18,13 @@
   - RDF N-Triples, Turtle, JSON-LD
 - Optional transformation via [JSON-LD Framing](https://json-ld.org/spec/latest/json-ld-framing/)
 
+
+## Example
+
+|Name|Parameters|Examples|Description|
+|----|----------|--------|-----------
+|filter-by-docdate|date (YYYY-MM-DD)|date=1992-12-14|List by date (YYYY-MM-DD)|
+
 ---
 
 ## How it works
