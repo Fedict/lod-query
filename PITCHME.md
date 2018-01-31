@@ -28,15 +28,11 @@
 
 ---
 
-## Example query
+## Example
 
-?code=prod/query/fsb-services/families.qr
++++?code=prod/query/fsb-services/families.qr
 
----
-
-## Example JSON-LD frame
-
-?code=prod/query/fsb-services/families.frame
++++?code=prod/query/fsb-services/families.frame
 
 ---
 
