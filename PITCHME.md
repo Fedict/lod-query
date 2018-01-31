@@ -30,11 +30,17 @@
 
 ## Example
 
+```
+GET https://id.belgium.be/_query/fsb-services/families
+```
+
 +++?code=prod/query/fsb-services/families.qr
 
-## JSON
+SPARQL query
 
 +++?code=prod/query/fsb-services/families.frame
+
+JSON-LD Frame
 
 ---
 
