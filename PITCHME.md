@@ -8,7 +8,7 @@
 
 - Abstract/hide SPARQL API
 
---
+---
 
 ## Features
 
@@ -16,7 +16,7 @@
   - RDF N-Triples, Turtle, JSON-LD
 - Optional transformation via [JSON-LD Framing](https://json-ld.org/spec/latest/json-ld-framing/)
 
---
+---
 
 ## How it works
 
