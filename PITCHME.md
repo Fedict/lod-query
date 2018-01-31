@@ -24,7 +24,8 @@
 
 - One directory with queries per repository
 - HTTP GET executes SPARQL with parameters
-- Optional JSON-LD frame file
+- Optional a JSON-LD Frame file is applied
+  - Result is still valid JSON-LD
 
 ---
 
