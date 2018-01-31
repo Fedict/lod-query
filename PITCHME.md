@@ -20,19 +20,23 @@
 
 ---
 
-## Example
-
-|Name|Parameters|Examples|Description|
-|----|----------|--------|-----------
-|filter-by-docdate|date (YYYY-MM-DD)|date=1992-12-14|List by date (YYYY-MM-DD)|
-
----
-
 ## How it works
 
 - One directory with queries per repository
 - HTTP GET executes SPARQL with parameters
 - Optional JSON-LD frame file
+
+---
+
+## Example query
+
+---?code=prod/query/fsb-services/families.qr
+
+---
+
+## Example JSON-LD frame
+
+---?code=prod/query/fsb-services/families.frame
 
 ---
 
