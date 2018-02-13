@@ -1,0 +1,17 @@
+# SANBDBOX List of FSB services and the families they belong to
+#
+# @param (none)
+
+PREFIX dcat: <http://www.w3.org/ns/dcat#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+CONSTRUCT {
+	?s ?p ?o .
+	?theme ?q ?r
+} WHERE {
+	?s ?p ?o .
+	?s dcat:theme ?theme .
+	SERVICE SILENT <http://localhost:7200/repositories/sandboxv2> {
+		?theme ?q ?r .
+	}
+}

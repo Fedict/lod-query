@@ -35,10 +35,6 @@
 			"@id": "dcat:landingPage",
 			"@type": "@id"
 		},
-		"downloadURL": {
-			"@id": "dcat:downloadURL",
-			"@type": "@id"
-		},
 		"rights": {
 			"@id": "dcterms:accessRights",
 			"@type": "@id"
@@ -52,7 +48,6 @@
 	"created": {},
 	"modified": {},
 	"dcterms:accessRights": {},
-	"dcat:downloadURL": {},
 	"dcat:landingPage": {},
 	"theme": {
 		"@type": "skos:Concept",
