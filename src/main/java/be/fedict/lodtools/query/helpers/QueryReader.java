@@ -79,11 +79,12 @@ public class QueryReader {
 	public String[] listRepositories() {
 		File[] dirs = Paths.get(root).toFile().listFiles();
 		if (dirs == null) {
-			LOG.error("No repository directories in {}", root);
+			LOG.error("Could not list files in {}", root);
 			return new String[0];
 		}
-		return Arrays.stream(dirs).filter(File::isDirectory)
-							.map(File::getName).sorted().toArray(String[]::new);
+		return Arrays.stream(dirs)
+					.filter(File::isDirectory).map(File::getName).sorted()
+					.toArray(String[]::new);
 	}
 	
 	/**

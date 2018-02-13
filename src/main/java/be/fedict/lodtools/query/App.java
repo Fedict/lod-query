@@ -26,6 +26,7 @@
 package be.fedict.lodtools.query;
 
 import be.fedict.lodtools.query.health.RdfStoreHealthCheck;
+import be.fedict.lodtools.query.helpers.HTMLMessageBodyWriter;
 import be.fedict.lodtools.query.helpers.ManagedRepositoryManager;
 import be.fedict.lodtools.query.helpers.QueryReader;
 import be.fedict.lodtools.query.helpers.JSONLDMessageBodyWriter;
@@ -33,9 +34,11 @@ import be.fedict.lodtools.query.helpers.RDFMessageBodyWriter;
 import be.fedict.lodtools.query.resources.QueryResource;
 
 import io.dropwizard.Application;
+import io.dropwizard.bundles.assets.ConfiguredAssetsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.views.ViewBundle;
+
 import java.util.Map;
 
 import org.eclipse.rdf4j.repository.manager.RemoteRepositoryManager;
@@ -59,6 +62,7 @@ public class App extends Application<AppConfig> {
 	
 	@Override
 	public void initialize(Bootstrap<AppConfig> config) {
+		config.addBundle(new ConfiguredAssetsBundle());
 		config.addBundle(new ViewBundle<AppConfig>() {
 			@Override
 			public Map<String, Map<String, String>> getViewConfiguration(AppConfig config) {
@@ -69,7 +73,6 @@ public class App extends Application<AppConfig> {
 	
 	@Override
     public void run(AppConfig config, Environment env) {
-		
 		// Query and JSONLD frame readers
 		QueryReader qr = new QueryReader(config.getQueryRoot());
 		
@@ -87,6 +90,7 @@ public class App extends Application<AppConfig> {
 		env.lifecycle().manage(new ManagedRepositoryManager(mgr));	
 	
 		// RDF Serialization format
+		env.jersey().register(new HTMLMessageBodyWriter());
 		env.jersey().register(new JSONLDMessageBodyWriter());
 		env.jersey().register(new RDFMessageBodyWriter());
 

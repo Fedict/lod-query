@@ -29,7 +29,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableMap;
 
 import io.dropwizard.Configuration;
+import io.dropwizard.bundles.assets.AssetsBundleConfiguration;
+import io.dropwizard.bundles.assets.AssetsConfiguration;
 import java.util.Map;
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.URL;
@@ -38,7 +41,7 @@ import org.hibernate.validator.constraints.URL;
  *
  * @author Bart.Hanssens
  */
-public class AppConfig extends Configuration {
+public class AppConfig extends Configuration implements AssetsBundleConfiguration {
 	@URL
 	@NotNull
 	private String sparqlPoint;
@@ -51,6 +54,11 @@ public class AppConfig extends Configuration {
 	
 	@NotNull
 	private ImmutableMap<String, Map<String, String>> views;
+	
+	@Valid
+	@NotNull
+	@JsonProperty
+	private final AssetsConfiguration assets = AssetsConfiguration.builder().build();
 
 	@JsonProperty
 	public String getSparqlPoint() {
@@ -104,5 +112,10 @@ public class AppConfig extends Configuration {
 			builder.put(entry.getKey(), ImmutableMap.copyOf(entry.getValue()));
 		}
 		this.views = builder.build();
+	}
+
+	@Override
+	public AssetsConfiguration getAssetsConfiguration() {
+		return assets;
 	}
 }

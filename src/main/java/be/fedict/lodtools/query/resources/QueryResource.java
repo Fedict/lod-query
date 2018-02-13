@@ -105,7 +105,8 @@ public class QueryResource extends RdfResource {
 	@GET
 	@Path("/{repo}/{query}")
 	@ExceptionMetered
-	@Produces({RDFMediaType.TTL + ";qs=0.25", RDFMediaType.NTRIPLES + ";qs=0.25"})
+	@Produces({RDFMediaType.TTL + ";qs=0.25", RDFMediaType.NTRIPLES + ";qs=0.25",
+				MediaType.TEXT_HTML + ";qs=0.25"})
 	public Model queryRDF(@PathParam("repo") String repo, 
 			@PathParam("query") String qry, @Context UriInfo info) {		
 		return query(repo, qry, info.getQueryParameters()).getModel();	
