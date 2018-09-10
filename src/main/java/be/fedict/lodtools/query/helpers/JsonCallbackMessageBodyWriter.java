@@ -27,7 +27,6 @@ package be.fedict.lodtools.query.helpers;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
@@ -38,6 +37,7 @@ import java.lang.reflect.Type;
 
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
@@ -50,35 +50,48 @@ import javax.ws.rs.ext.Provider;
  * @author Bart.Hanssens
  */
 @Provider
-@Produces(MediaType.APPLICATION_JSON)
-public class JsonObjectMessageBodyWriter implements MessageBodyWriter<JsonNode> {
+@Produces({MediaType.APPLICATION_JSON,MediaType.TEXT_HTML})
+public class JsonCallbackMessageBodyWriter implements MessageBodyWriter<JsonCallback> {
 	private final static JsonFactory FAC = new JsonFactory();
 	
 	@Override
 	public boolean isWriteable(Class<?> type, Type generic, 
 										Annotation[] antns, MediaType mt) {
-		return generic == JsonNode.class;
+		return generic == JsonCallback.class;
 	}
 
 	@Override
-	public long getSize(JsonNode mf, Class<?> type, Type generic, 
+	public long getSize(JsonCallback jc, Class<?> type, Type generic, 
 										Annotation[] antns, MediaType mt) {
 		return 0; // ignored by Jersey 2.0 anyway
 	}
 
 	@Override
-	public void writeTo(JsonNode j, Class<?> type, Type generic, 
+	public void writeTo(JsonCallback jc, Class<?> type, Type generic, 
 						Annotation[] antns, MediaType mt, 
 						MultivaluedMap<String, Object> mm, OutputStream out) 
 									throws IOException, WebApplicationException {
-		if (j.isNull()) {
+		if (jc.getNode().isNull()) {
 			throw new WebApplicationException(Response.Status.NOT_FOUND);
 		}
 
-		try { 
+		String callback = jc.getCallback();
+		try {
+			if (! callback.isEmpty()) {
+				mm.putSingle(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_HTML);
+				out.write(callback.getBytes());
+				out.write('(');
+			} else {
+				mm.putSingle(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
+			}
+			
 			JsonGenerator generator = FAC.createGenerator(out);
 			ObjectMapper mapper = new ObjectMapper();
-			mapper.writeTree(generator, j);
+			mapper.writeTree(generator, jc.getNode());
+			
+			if (! callback.isEmpty()) {
+				out.write(");".getBytes());
+			}
 		} catch (IOException ioe) {
 			throw new WebApplicationException(ioe);
 		}

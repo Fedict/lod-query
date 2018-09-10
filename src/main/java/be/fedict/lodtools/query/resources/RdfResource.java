@@ -78,6 +78,10 @@ public abstract class RdfResource {
 	private final ValueFactory fac = SimpleValueFactory.getInstance();
 
 	
+	protected QueryReader getReader() {
+		return qr;
+	}
+	
 	/**
 	 * Get string as RDF literal
 	 * 

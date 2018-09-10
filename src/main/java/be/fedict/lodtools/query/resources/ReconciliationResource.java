@@ -25,6 +25,7 @@
  */
 package be.fedict.lodtools.query.resources;
 
+import be.fedict.lodtools.query.helpers.JsonCallback;
 import be.fedict.lodtools.query.helpers.ReconcileReader;
 import be.fedict.lodtools.query.views.PreviewView;
 import be.fedict.lodtools.query.views.ServiceListView;
@@ -100,21 +101,23 @@ public class ReconciliationResource extends RdfResource {
 	 * Convert RDF result into JSON result object
 	 * 
 	 * @param m RDF result
-	 * @return object or null
+	 * @return object
 	 */
-	private JsonNode getResult(Model m) {
-		if (m == null || m.isEmpty()) {
-			return null;
-		}
+	private JsonNode getResult(Model m) {	
 		ObjectNode res = FAC.objectNode();
 		ArrayNode arr = FAC.arrayNode();
+		res.set("result", arr);
+		
+		if (m == null || m.isEmpty()) {
+			return res;
+		}
 		
 		Resource subject = Models.subject(m).get();
 		for (String label: Models.objectStrings(m)) {
 			arr.add(FAC.objectNode().put("id", subject.toString())
 									.put("name", label));
 		}
-		return res.set("result", arr);
+		return res;
 	}
 
 	/**
@@ -141,13 +144,17 @@ public class ReconciliationResource extends RdfResource {
 	@Path("/{repo}")
 	@ExceptionMetered
 	@Produces({MediaType.APPLICATION_JSON})
-	public JsonNode queryJSON(@PathParam("repo") String repo, 
-			@QueryParam("queries") String queries,
+	public JsonCallback queryJSON(@PathParam("repo") String repo, 
+			@QueryParam("queries") Optional<String> queries,
 			@QueryParam("callback") Optional<String> callback) {
 		JsonNode root;
 
 		try {
-			root = MAPPER.readTree(queries);
+			if (!queries.isPresent()) {
+				String str = getReader().read(repo, "reconcile.json");
+				return new JsonCallback(MAPPER.readTree(str), callback.orElse(""));
+			}
+			root = MAPPER.readTree(queries.get());
 		} catch (IOException ex) {
 			throw new WebApplicationException(ex);
 		}
@@ -162,7 +169,7 @@ public class ReconciliationResource extends RdfResource {
 			JsonNode result = getResult(m);
 			results.set(name, result);
 		}
-		return results;
+		return new JsonCallback(results, callback.orElse(""));
 	}
 	
 	/**
