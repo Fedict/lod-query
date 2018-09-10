@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Bart Hanssens <bart.hanssens@fedict.be>
+ * Copyright (c) 2018, Bart Hanssens <bart.hanssens@bosa.fgov.be>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,36 +23,49 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package be.fedict.lodtools.query.helpers;
+package be.fedict.lodtools.query.views;
 
-import io.dropwizard.lifecycle.Managed;
+import io.dropwizard.views.View;
 
-import org.eclipse.rdf4j.repository.manager.RepositoryManager;
+import java.nio.charset.StandardCharsets;
 
 /**
- * Life-cycle management helper class
+ * HTML view for  reconciliation preview
  * 
  * @author Bart.Hanssens
  */
-public class ManagedRepositoryManager implements Managed {
-	private final RepositoryManager mgr;
-
-	@Override
-	public void start() throws Exception {
-	}
-
-	@Override
-	public void stop() throws Exception {
-		mgr.getInitializedRepositories().forEach(r -> r.shutDown());
-		mgr.shutDown();
-	}
-
+public class PreviewView extends View {
+	private final String id;
+	private final String[] labels;
+	
 	/**
+	 * Get the ID of the object to preview
+	 * 
+	 * @return ID as string
+	 */
+	public String getId() {
+		return this.id;
+	}
+	
+	/**
+	 * Get list of labels associated with the ID
+	 * 
+	 * @return array of services
+	 */
+	public String[] getLabels() {
+		return this.labels;
+	}
+	
+	/** 
 	 * Constructor
 	 * 
-	 * @param mgr RDF repository manager
+	 * @param id id of thing to preview
+	 * @param labels list of labels
 	 */
-	public ManagedRepositoryManager(RepositoryManager mgr) {
-		this.mgr = mgr;
+	public PreviewView(String id, String[] labels) {
+		super("preview.ftl", StandardCharsets.UTF_8);
+		this.id = id;
+		this.labels = labels;
 	}
 }
+

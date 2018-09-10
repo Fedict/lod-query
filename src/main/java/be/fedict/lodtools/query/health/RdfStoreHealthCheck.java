@@ -39,8 +39,8 @@ public class RdfStoreHealthCheck extends HealthCheck {
 	@Override
 	protected Result check() throws Exception {
 		return repo.getConnection().isOpen() 
-								? Result.healthy() 
-								: Result.unhealthy("Triplestore unreachable");
+				? Result.healthy() 
+				: Result.unhealthy("Triplestore unreachable");
 	}
 	
 	/**

@@ -25,34 +25,45 @@
  */
 package be.fedict.lodtools.query.helpers;
 
-import io.dropwizard.lifecycle.Managed;
+import java.io.IOException;
 
-import org.eclipse.rdf4j.repository.manager.RepositoryManager;
+
+import javax.ws.rs.WebApplicationException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * Life-cycle management helper class
+ * Read the reconciliation info from a source
  * 
  * @author Bart.Hanssens
  */
-public class ManagedRepositoryManager implements Managed {
-	private final RepositoryManager mgr;
-
-	@Override
-	public void start() throws Exception {
+public class ReconcileReader extends QueryReader {
+	private final static Logger LOG = LoggerFactory.getLogger(ReconcileReader.class);
+	
+	
+	/**
+	 * Get the query string
+	 * 
+	 * @param repoName repository name
+	 * @return raw query string
+	 * @throws WebApplicationException
+	 */
+	public String getQuery(String repoName) {
+		try {
+			return read(repoName, "reconcile.qr");
+		} catch (IOException ex) {
+			LOG.error("Couldn't read reconcile query for repo {}", repoName);
+			throw new WebApplicationException(ex);
+		}
 	}
-
-	@Override
-	public void stop() throws Exception {
-		mgr.getInitializedRepositories().forEach(r -> r.shutDown());
-		mgr.shutDown();
-	}
-
+	
 	/**
 	 * Constructor
 	 * 
-	 * @param mgr RDF repository manager
+	 * @param root root directory
 	 */
-	public ManagedRepositoryManager(RepositoryManager mgr) {
-		this.mgr = mgr;
+	public ReconcileReader(String root) {
+		super(root);
 	}
 }

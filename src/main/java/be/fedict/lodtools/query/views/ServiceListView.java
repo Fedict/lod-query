@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Bart Hanssens <bart.hanssens@fedict.be>
+ * Copyright (c) 2018, Bart Hanssens <bart.hanssens@bosa.fgov.be>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,36 +23,37 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package be.fedict.lodtools.query.helpers;
+package be.fedict.lodtools.query.views;
 
-import io.dropwizard.lifecycle.Managed;
+import io.dropwizard.views.View;
 
-import org.eclipse.rdf4j.repository.manager.RepositoryManager;
+import java.nio.charset.StandardCharsets;
 
 /**
- * Life-cycle management helper class
+ * HTML view for  reconciliation services lists
  * 
  * @author Bart.Hanssens
  */
-public class ManagedRepositoryManager implements Managed {
-	private final RepositoryManager mgr;
-
-	@Override
-	public void start() throws Exception {
-	}
-
-	@Override
-	public void stop() throws Exception {
-		mgr.getInitializedRepositories().forEach(r -> r.shutDown());
-		mgr.shutDown();
-	}
-
+public class ServiceListView extends View {
+	private final String[] services;
+	
 	/**
+	 * Get list of reconciliation services
+	 * 
+	 * @return array of services
+	 */
+	public String[] getServices() {
+		return this.services;
+	}
+	
+	/** 
 	 * Constructor
 	 * 
-	 * @param mgr RDF repository manager
+	 * @param services list of services
 	 */
-	public ManagedRepositoryManager(RepositoryManager mgr) {
-		this.mgr = mgr;
+	public ServiceListView(String[] services) {
+		super("servicelist.ftl", StandardCharsets.UTF_8);
+		this.services = services;
 	}
 }
+

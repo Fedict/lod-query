@@ -51,6 +51,8 @@ public class AppConfig extends Configuration implements AssetsBundleConfiguratio
 	
 	@NotNull
 	private String queryRoot;
+	@NotNull
+	private String reconcileRoot;
 	
 	@NotNull
 	private ImmutableMap<String, Map<String, String>> views;
@@ -98,6 +100,16 @@ public class AppConfig extends Configuration implements AssetsBundleConfiguratio
 	@JsonProperty
 	public void setQueryRoot(String queryRoot) {
 		this.queryRoot = queryRoot;
+	}
+	
+	@JsonProperty
+	public String getReconcileRoot() {
+		return reconcileRoot;
+	}
+
+	@JsonProperty
+	public void setReconcileRoot(String reconcileRoot) {
+		this.reconcileRoot = reconcileRoot;
 	}
 	
 	@JsonProperty

@@ -51,7 +51,6 @@ import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.model.vocabulary.ROV;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
-import org.eclipse.rdf4j.query.BindingSet;
 
 import org.eclipse.rdf4j.query.GraphQuery;
 import org.eclipse.rdf4j.query.MalformedQueryException;
@@ -158,10 +157,11 @@ public abstract class RdfResource {
 	 * @param params parameters for bindings (if any)
 	 * @return results in triple model
 	 */
-	protected ModelFrame query(String repoName, String qryName, MultivaluedMap<String,String> params) {
+	protected ModelFrame query(String repoName, String qryName, MultivaluedMap<String,String> params,
+																boolean getFrame) {
 		Repository repo = getRepository(repoName);
 		
-		String f = qr.getFrame(repoName, qryName);
+		String f = (getFrame) ? qr.getFrame(repoName, qryName) : "";
 		String qry = qr.getQuery(repoName, qryName);
 			
 		try (RepositoryConnection conn = repo.getConnection()) {

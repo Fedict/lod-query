@@ -91,7 +91,7 @@ public class QueryResource extends RdfResource {
 	@Produces({RDFMediaType.JSONLD + ";qs=0.75"})
 	public ModelFrame queryJSON(@PathParam("repo") String repo, 
 			@PathParam("query") String qry, @Context UriInfo info) {		
-		return query(repo, qry, info.getQueryParameters());	
+		return query(repo, qry, info.getQueryParameters(), true);	
 	}
 	
 	/**
@@ -109,7 +109,7 @@ public class QueryResource extends RdfResource {
 				MediaType.TEXT_HTML + ";qs=0.25"})
 	public Model queryRDF(@PathParam("repo") String repo, 
 			@PathParam("query") String qry, @Context UriInfo info) {		
-		return query(repo, qry, info.getQueryParameters()).getModel();	
+		return query(repo, qry, info.getQueryParameters(), false).getModel();	
 	}
 	
 	/**

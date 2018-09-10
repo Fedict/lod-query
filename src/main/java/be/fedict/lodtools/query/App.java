@@ -26,12 +26,14 @@
 package be.fedict.lodtools.query;
 
 import be.fedict.lodtools.query.health.RdfStoreHealthCheck;
-import be.fedict.lodtools.query.helpers.HTMLMessageBodyWriter;
 import be.fedict.lodtools.query.helpers.ManagedRepositoryManager;
 import be.fedict.lodtools.query.helpers.QueryReader;
 import be.fedict.lodtools.query.helpers.JSONLDMessageBodyWriter;
+import be.fedict.lodtools.query.helpers.JsonObjectMessageBodyWriter;
 import be.fedict.lodtools.query.helpers.RDFMessageBodyWriter;
+import be.fedict.lodtools.query.helpers.ReconcileReader;
 import be.fedict.lodtools.query.resources.QueryResource;
+import be.fedict.lodtools.query.resources.ReconciliationResource;
 
 import io.dropwizard.Application;
 import io.dropwizard.bundles.assets.ConfiguredAssetsBundle;
@@ -75,6 +77,7 @@ public class App extends Application<AppConfig> {
     public void run(AppConfig config, Environment env) {
 		// Query and JSONLD frame readers
 		QueryReader qr = new QueryReader(config.getQueryRoot());
+		ReconcileReader rr = new ReconcileReader(config.getReconcileRoot());
 		
 		// repository
 		String endpoint = config.getSparqlPoint();
@@ -90,12 +93,14 @@ public class App extends Application<AppConfig> {
 		env.lifecycle().manage(new ManagedRepositoryManager(mgr));	
 	
 		// RDF Serialization format
-		env.jersey().register(new HTMLMessageBodyWriter());
 		env.jersey().register(new JSONLDMessageBodyWriter());
+		env.jersey().register(new JsonObjectMessageBodyWriter());
 		env.jersey().register(new RDFMessageBodyWriter());
 
 		// Page regource
 		env.jersey().register(new QueryResource(mgr, qr));
+		env.jersey().register(new ReconciliationResource(mgr, rr));
+		
 		
 		// Monitoring
 		RdfStoreHealthCheck check = new RdfStoreHealthCheck(mgr.getSystemRepository());

@@ -59,7 +59,7 @@ public class QueryReader {
 	 * @return raw file content
 	 * @throws IOException
 	 */
-	private String read(String repoName, String file) throws IOException {		
+	protected String read(String repoName, String file) throws IOException {		
 		Path p = Paths.get(root, repoName, file);
 		LOG.info("Load from {}", file);
 		
