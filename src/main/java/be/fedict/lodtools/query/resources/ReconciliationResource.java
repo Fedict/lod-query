@@ -82,7 +82,7 @@ public class ReconciliationResource extends RdfResource {
 		}
 		
 		int limit = 3;
-		JsonNode l = node.get("query");
+		JsonNode l = node.get("limit");
 		if (l != null) {
 			try {
 				limit = Integer.getInteger(l.textValue());
@@ -157,7 +157,7 @@ public class ReconciliationResource extends RdfResource {
         while (fields.hasNext()) {
 			String name = fields.next();
 			JsonNode node = root.get(name);
-			Model m = query(repo, "reconcile.qr", getParams(node), false).getModel();
+			Model m = query(repo, "reconcile", getParams(node), false).getModel();
 			
 			JsonNode result = getResult(m);
 			results.set(name, result);
@@ -181,7 +181,7 @@ public class ReconciliationResource extends RdfResource {
 		MultivaluedMap<String,String> params = new MultivaluedHashMap<>();
 		params.add("id", id);
 
-		Model m = query(repo, "preview.qr", params, false).getModel();
+		Model m = query(repo, "preview", params, false).getModel();
 		Set<String> labels = Models.objectStrings(m);
 		
 		return new PreviewView(id, labels.toArray(new String[0]));
