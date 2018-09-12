@@ -84,7 +84,6 @@ public class JsonCallbackMessageBodyWriter implements MessageBodyWriter<JsonCall
 			} else {
 				mm.putSingle(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON);
 			}
-			
 			JsonGenerator generator = FAC.createGenerator(out);
 			ObjectMapper mapper = new ObjectMapper();
 			mapper.writeTree(generator, jc.getNode());

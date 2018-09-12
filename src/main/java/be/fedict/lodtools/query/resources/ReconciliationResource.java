@@ -40,22 +40,31 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import javax.servlet.ServletInputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.FormParam;
 
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
+import org.apache.commons.io.IOUtils;
 
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.util.Models;
+import org.eclipse.rdf4j.query.Binding;
+import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.repository.manager.RepositoryManager;
 
 /**
@@ -82,40 +91,41 @@ public class ReconciliationResource extends RdfResource {
 			throw new WebApplicationException("No query field present");
 		}
 		
-		int limit = 3;
-		JsonNode l = node.get("limit");
-		if (l != null) {
-			try {
-				limit = Integer.getInteger(l.textValue());
-			} catch (NumberFormatException nfe) {
-				throw new WebApplicationException("Invalid limit number");
-			}
-		}
+		//JsonNode l = node.get("limit");
 		params.add("query", q.textValue());
-		params.add("limit", String.valueOf(limit));
+		//params.add("limit", l == null ? "10" : String.valueOf(l.asInt(3)));
 		
 		return params;
 	}
-	 
+	
+	
 	/**
-	 * Convert RDF result into JSON result object
+	 * Convert RDF tuple result into JSON result object
 	 * 
-	 * @param m RDF result
+	 * @param table
 	 * @return object
 	 */
-	private JsonNode getResult(Model m) {	
+	private JsonNode getResult(List<BindingSet> table) {	
 		ObjectNode res = FAC.objectNode();
 		ArrayNode arr = FAC.arrayNode();
 		res.set("result", arr);
 		
-		if (m == null || m.isEmpty()) {
+		if (table == null || table.isEmpty()) {
 			return res;
 		}
 		
-		Resource subject = Models.subject(m).get();
-		for (String label: Models.objectStrings(m)) {
-			arr.add(FAC.objectNode().put("id", subject.toString())
-									.put("name", label));
+		for(BindingSet row: table) {
+			double score = Double.valueOf(getBindVal(row, "score"));
+			boolean match = score > 0.9;
+			
+			ObjectNode obj = FAC.objectNode()
+								.put("id", getBindVal(row, "id"))
+								.put("score", score)
+								.put("match", match);
+			
+			ArrayNode arrt = FAC.arrayNode().add(getBindVal(row, "type"));
+			obj.set("type", arrt);
+			arr.add(obj);
 		}
 		return res;
 	}
@@ -132,6 +142,16 @@ public class ReconciliationResource extends RdfResource {
 		return new ServiceListView(listRepositories());
 	}
 	
+	@POST
+	@Path("/{repo}")
+	@ExceptionMetered
+	@Produces({MediaType.APPLICATION_JSON})
+	public JsonCallback queryJSONPost(@PathParam("repo") String repo, 
+			@FormParam("queries") Optional<String> queries,
+			@FormParam("callback") Optional<String> callback) {
+		return queryJSON(repo, queries, callback);
+	}
+
 	/**
 	 * Execute a reconciliation query
 	 * 
@@ -164,9 +184,12 @@ public class ReconciliationResource extends RdfResource {
         while (fields.hasNext()) {
 			String name = fields.next();
 			JsonNode node = root.get(name);
-			Model m = query(repo, "reconcile", getParams(node), false).getModel();
-			
-			JsonNode result = getResult(m);
+
+			List<BindingSet> res = query(repo, "reconcile", getParams(node));
+			if (res == null || res.isEmpty()) {
+				res = query(repo, "reconcile_fuzzy", getParams(node));
+			}
+			JsonNode result = getResult(res);
 			results.set(name, result);
 		}
 		return new JsonCallback(results, callback.orElse(""));

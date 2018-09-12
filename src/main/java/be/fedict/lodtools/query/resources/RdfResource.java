@@ -31,6 +31,7 @@ import be.fedict.lodtools.query.helpers.QueryReader;
 
 import java.text.MessageFormat;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.ws.rs.WebApplicationException;
@@ -51,6 +52,8 @@ import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.model.vocabulary.ROV;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
+import org.eclipse.rdf4j.query.Binding;
+import org.eclipse.rdf4j.query.BindingSet;
 
 import org.eclipse.rdf4j.query.GraphQuery;
 import org.eclipse.rdf4j.query.MalformedQueryException;
@@ -64,6 +67,7 @@ import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.RepositoryException;
 import org.eclipse.rdf4j.repository.manager.RepositoryManager;
 import org.eclipse.rdf4j.repository.sparql.query.QueryStringUtil;
+import org.eclipse.rdf4j.repository.util.Repositories;
 
 
 /**
@@ -152,32 +156,68 @@ public abstract class RdfResource {
 		}
 		return bindings;
 	}
+
+	/**
+	 * Safely get a value from a bindingset
+	 * 
+	 * @param bindingSet
+	 * @param name name of the binding
+	 * @return value or null
+	 */
+	protected String getBindVal(BindingSet bindingSet, String name) {
+		Binding b = bindingSet.getBinding(name);
+		return (b != null ? b.getValue().stringValue() : null);
+	}
 	
 	/**
-	 * Prepare and run a SPARQL query
+	 * Prepare and run a SPARQL tuple query
+	 * 
+	 * @param repoName repository name
+	 * @param qryName query name
+	 * @param params parameters for binding (if any)
+	 * @return results in bindingset list
+	 */
+	protected List<BindingSet> query(String repoName, String qryName, 
+										MultivaluedMap<String,String> params) {
+		Repository repo = getRepository(repoName);
+		
+		String qry = qr.getQuery(repoName, qryName);
+		
+		// Replace params here for performance (mostly within glue BIND's) 
+		MapBindingSet bs = new MapBindingSet();
+		bind(params).forEach((k,v) -> bs.addBinding(k, v));
+		qry = QueryStringUtil.getGraphQueryString(qry, bs);
+
+		try {
+			return Repositories.tupleQuery(repo, qry, r -> QueryResults.asList(r));
+		} catch (RepositoryException|MalformedQueryException|QueryEvaluationException e) {
+			throw new WebApplicationException("Error executing query", e);
+		}
+	}
+
+	/**
+	 * Prepare and run a SPARQL graph query
 	 * 
 	 * @param repoName repository name
 	 * @param qryName query string
 	 * @param params parameters for bindings (if any)
+	 * @param getFrame read JSON-LD frame or not
 	 * @return results in triple model
 	 */
-	protected ModelFrame query(String repoName, String qryName, MultivaluedMap<String,String> params,
-																boolean getFrame) {
+	protected ModelFrame query(String repoName, String qryName, 
+							MultivaluedMap<String,String> params, boolean getFrame) {
 		Repository repo = getRepository(repoName);
 		
 		String f = (getFrame) ? qr.getFrame(repoName, qryName) : "";
 		String qry = qr.getQuery(repoName, qryName);
+		
+		// Replace params here for performance (mostly within glue BIND's) 
+		MapBindingSet bs = new MapBindingSet();
+		bind(params).forEach((k,v) -> bs.addBinding(k, v));
+		qry = QueryStringUtil.getGraphQueryString(qry, bs);
 			
 		try (RepositoryConnection conn = repo.getConnection()) {
-			// Replace params here for performance (mostly within glue BIND's) 
-			MapBindingSet bs = new MapBindingSet();
-			bind(params).forEach((k,v) -> bs.addBinding(k, v));
-			qry = QueryStringUtil.getGraphQueryString(qry, bs);
-			
 			GraphQuery q = conn.prepareGraphQuery(QueryLanguage.SPARQL, qry);
-			
-			//bind(params).forEach((k,v) -> q.setBinding(k, v));
-	
 			Model m = setNamespaces(QueryResults.asModel(q.evaluate()));
 			
 			return new ModelFrame(m, f);

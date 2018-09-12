@@ -68,4 +68,3 @@ public class PreviewView extends View {
 		this.labels = labels;
 	}
 }
-
