@@ -28,7 +28,7 @@ package be.fedict.lodtools.query.resources;
 import be.fedict.lodtools.query.helpers.JsonCallback;
 import be.fedict.lodtools.query.helpers.ReconcileReader;
 import be.fedict.lodtools.query.views.PreviewView;
-import be.fedict.lodtools.query.views.ServiceListView;
+import be.fedict.lodtools.query.views.RepositoryListView;
 
 import com.codahale.metrics.annotation.ExceptionMetered;
 
@@ -43,10 +43,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import javax.servlet.ServletInputStream;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.FormParam;
 
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -54,16 +52,12 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
-import org.apache.commons.io.IOUtils;
 
 import org.eclipse.rdf4j.model.Model;
-import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.util.Models;
-import org.eclipse.rdf4j.query.Binding;
 import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.repository.manager.RepositoryManager;
 
@@ -139,8 +133,8 @@ public class ReconciliationResource extends RdfResource {
 	@GET
 	@Path("/")
 	@Produces({MediaType.TEXT_HTML})
-	public ServiceListView repoList() {
-		return new ServiceListView(listRepositories());
+	public RepositoryListView repoList() {
+		return new RepositoryListView("_reconcile", listRepositories());
 	}
 	
 	@POST

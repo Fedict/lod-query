@@ -35,7 +35,17 @@ import java.nio.charset.StandardCharsets;
  * @author Bart.Hanssens
  */
 public class RepositoryListView extends View {
+	private final String path;
 	private final String[] repos;
+	
+	/**
+	 * Subdirectory, _query or _reconcile
+	 * 
+	 * @return 
+	 */
+	public String getPath() {
+		return this.path;
+	}
 	
 	/**
 	 * Get list of queryable repositories
@@ -49,10 +59,12 @@ public class RepositoryListView extends View {
 	/** 
 	 * Constructor
 	 * 
+	 * @param path subdirectory
 	 * @param repos list of repositories
 	 */
-	public RepositoryListView(String[] repos) {
+	public RepositoryListView(String path, String[] repos) {
 		super("repolist.ftl", StandardCharsets.UTF_8);
+		this.path = path;
 		this.repos = repos;
 	}
 }

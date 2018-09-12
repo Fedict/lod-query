@@ -61,7 +61,7 @@ public class QueryResource extends RdfResource {
 	@Path("/")
 	@Produces({MediaType.TEXT_HTML})
 	public RepositoryListView repoList() {
-		return new RepositoryListView(listRepositories());
+		return new RepositoryListView("_query", listRepositories());
 	}
 	
 	/**
