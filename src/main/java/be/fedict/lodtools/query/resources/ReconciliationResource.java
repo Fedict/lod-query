@@ -116,10 +116,11 @@ public class ReconciliationResource extends RdfResource {
 		
 		for(BindingSet row: table) {
 			double score = Double.valueOf(getBindVal(row, "score"));
-			boolean match = score > 0.9;
+			boolean match = score > 10;
 			
 			ObjectNode obj = FAC.objectNode()
 								.put("id", getBindVal(row, "id"))
+								.put("name", getBindVal(row, "name"))
 								.put("score", score)
 								.put("match", match);
 			

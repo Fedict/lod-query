@@ -186,7 +186,7 @@ public abstract class RdfResource {
 		// Replace params here for performance (mostly within glue BIND's) 
 		MapBindingSet bs = new MapBindingSet();
 		bind(params).forEach((k,v) -> bs.addBinding(k, v));
-		qry = QueryStringUtil.getGraphQueryString(qry, bs);
+		qry = QueryStringUtil.getTupleQueryString(qry, bs);
 
 		try {
 			return Repositories.tupleQuery(repo, qry, r -> QueryResults.asList(r));
@@ -215,7 +215,7 @@ public abstract class RdfResource {
 		MapBindingSet bs = new MapBindingSet();
 		bind(params).forEach((k,v) -> bs.addBinding(k, v));
 		qry = QueryStringUtil.getGraphQueryString(qry, bs);
-			
+	
 		try (RepositoryConnection conn = repo.getConnection()) {
 			GraphQuery q = conn.prepareGraphQuery(QueryLanguage.SPARQL, qry);
 			Model m = setNamespaces(QueryResults.asModel(q.evaluate()));
