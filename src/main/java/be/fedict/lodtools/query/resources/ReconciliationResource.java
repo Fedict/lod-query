@@ -56,6 +56,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.util.Models;
 import org.eclipse.rdf4j.query.BindingSet;
@@ -77,16 +78,20 @@ public class ReconciliationResource extends RdfResource {
 	 * @param node
 	 * @return 
 	 */
-	private MultivaluedMap<String,String> getParams(JsonNode node) {
-		MultivaluedMap<String,String> params = new MultivaluedHashMap<>();
+	private MultivaluedMap<String,Object> getParams(JsonNode node) {
+		MultivaluedMap<String,Object> params = new MultivaluedHashMap<>();
 		
 		JsonNode q = node.get("query");
 		if (q == null) {
 			throw new WebApplicationException("No query field present");
 		}
-		
-		//JsonNode l = node.get("limit");
 		params.add("query", q.textValue());
+		
+		JsonNode t = node.get("type");
+		if (t != null) {
+			params.add("type", asIRI(t.textValue()));
+		}
+		
 		//params.add("limit", l == null ? "10" : String.valueOf(l.asInt(3)));
 		
 		return params;
@@ -136,7 +141,7 @@ public class ReconciliationResource extends RdfResource {
 	public RepositoryListView repoList() {
 		return new RepositoryListView("_reconcile", listRepositories());
 	}
-	
+
 	@POST
 	@Path("/{repo}")
 	@ExceptionMetered
@@ -203,7 +208,7 @@ public class ReconciliationResource extends RdfResource {
 	@ExceptionMetered
 	@Produces({MediaType.TEXT_HTML})
 	public PreviewView preview(@PathParam("repo") String repo, @QueryParam("id") String id) {
-		MultivaluedMap<String,String> params = new MultivaluedHashMap<>();
+		MultivaluedMap<String,Object> params = new MultivaluedHashMap<>();
 		params.add("id", id);
 
 		Model m = query(repo, "preview", params, false).getModel();

@@ -36,9 +36,11 @@ import java.util.Map;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MultivaluedMap;
+import org.eclipse.rdf4j.model.IRI;
 
 import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 
@@ -86,6 +88,10 @@ public abstract class RdfResource {
 		return qr;
 	}
 	
+	protected IRI asIRI(String str) {
+		return fac.createIRI(str);
+		
+	}
 	/**
 	 * Get string as RDF literal
 	 * 
@@ -143,14 +149,18 @@ public abstract class RdfResource {
 	 * @param params HTTP params
 	 * @return query bindings 
 	 */
-	protected HashMap<String,Literal> bind(MultivaluedMap<String,String> params) {
-		HashMap<String,Literal> bindings = new HashMap<>();
+	protected HashMap<String,Value> bind(MultivaluedMap<String,?> params) {
+		HashMap<String,Value> bindings = new HashMap<>();
 		
 		if (params != null) {
 			for(String key: params.keySet()) {
-				String p = params.getFirst(key);
+				Object p = params.getFirst(key);
 				if (p != null) {
-					bindings.put(key, asLiteral(p));
+					if (p instanceof IRI) {
+						bindings.put(key, (IRI) p);
+					} else {
+						bindings.put(key, asLiteral((String) p));
+					}
 				}
 			}
 		}
@@ -178,7 +188,7 @@ public abstract class RdfResource {
 	 * @return results in bindingset list
 	 */
 	protected List<BindingSet> query(String repoName, String qryName, 
-										MultivaluedMap<String,String> params) {
+										MultivaluedMap<String,Object> params) {
 		Repository repo = getRepository(repoName);
 		
 		String qry = qr.getQuery(repoName, qryName);
@@ -187,7 +197,7 @@ public abstract class RdfResource {
 		MapBindingSet bs = new MapBindingSet();
 		bind(params).forEach((k,v) -> bs.addBinding(k, v));
 		qry = QueryStringUtil.getTupleQueryString(qry, bs);
-
+System.err.println(qry);
 		try {
 			return Repositories.tupleQuery(repo, qry, r -> QueryResults.asList(r));
 		} catch (RepositoryException|MalformedQueryException|QueryEvaluationException e) {
@@ -205,7 +215,7 @@ public abstract class RdfResource {
 	 * @return results in triple model
 	 */
 	protected ModelFrame query(String repoName, String qryName, 
-							MultivaluedMap<String,String> params, boolean getFrame) {
+							MultivaluedMap<String,?> params, boolean getFrame) {
 		Repository repo = getRepository(repoName);
 		
 		String f = (getFrame) ? qr.getFrame(repoName, qryName) : "";

@@ -14,7 +14,7 @@
     <h1>List of repositories</h1>
     <ul>
     <#list r as repo>
-	<li><a href="_query/${repo}">${repo}</a></li>
+	<li><a href="${path}/${repo}">${repo}</a></li>
     </#list>
     </ul>
 </main>
