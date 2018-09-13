@@ -29,6 +29,7 @@ import be.fedict.lodtools.query.helpers.JsonCallback;
 import be.fedict.lodtools.query.helpers.ReconcileReader;
 import be.fedict.lodtools.query.views.PreviewView;
 import be.fedict.lodtools.query.views.RepositoryListView;
+import be.fedict.lodtools.query.views.ServiceListView;
 
 import com.codahale.metrics.annotation.ExceptionMetered;
 
@@ -39,7 +40,6 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -197,6 +197,13 @@ public class ReconciliationResource extends RdfResource {
 		return queriesJSON(repo, queries, callback);
 	}
 
+	@GET
+	@Path("/{repo}")
+	@Produces({MediaType.TEXT_HTML})
+	public ServiceListView service(@PathParam("repo") String repo) {
+		return new ServiceListView(repo, listQueries(repo).get("reconcile.qr"));
+	}
+	
 	/**
 	 * Execute one or more reconciliation queries
 	 * 

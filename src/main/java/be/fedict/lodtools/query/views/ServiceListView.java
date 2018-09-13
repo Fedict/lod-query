@@ -25,35 +25,48 @@
  */
 package be.fedict.lodtools.query.views;
 
+import be.fedict.lodtools.query.helpers.QueryComment;
 import io.dropwizard.views.View;
 
 import java.nio.charset.StandardCharsets;
 
 /**
- * HTML view for  reconciliation services lists
+ * HTML view for reconciliation service
  * 
- * @author Bart.Hanssens
+ * @author Bart Hanssens
  */
 public class ServiceListView extends View {
-	private final String[] services;
+	private final String repoName;
+	private final QueryComment querydesc;
 	
 	/**
-	 * Get list of reconciliation services
+	 * Get repository name
 	 * 
-	 * @return array of services
+	 * @return string
 	 */
-	public String[] getServices() {
-		return this.services;
+	public String getRepoName() {
+		return this.repoName;
+	}
+	
+	/**
+	 * Get reconciliation service description
+	 * 
+	 * @return 
+	 */
+	public QueryComment getService() {
+		return this.querydesc;
 	}
 	
 	/** 
 	 * Constructor
 	 * 
-	 * @param services list of services
+	 * @param repoName repository name
+	 * @param querydesc query description
 	 */
-	public ServiceListView(String[] services) {
+	public ServiceListView(String repoName, QueryComment querydesc) {
 		super("servicelist.ftl", StandardCharsets.UTF_8);
-		this.services = services;
+		this.repoName = repoName;
+		this.querydesc = querydesc;
 	}
 }
 

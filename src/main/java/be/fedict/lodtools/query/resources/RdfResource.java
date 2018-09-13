@@ -196,7 +196,7 @@ public abstract class RdfResource {
 		MapBindingSet bs = new MapBindingSet();
 		toBindings(params).forEach((k,v) -> bs.addBinding(k, v));
 		qry = QueryStringUtil.getTupleQueryString(qry, bs);
-System.err.println(qry);
+
 		try {
 			return Repositories.tupleQueryNoTransaction(repo, qry, r -> QueryResults.asList(r));
 		} catch (RepositoryException|MalformedQueryException|QueryEvaluationException e) {
