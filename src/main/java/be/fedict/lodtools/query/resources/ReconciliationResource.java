@@ -39,10 +39,12 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -56,40 +58,48 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 
-import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.util.Models;
 import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.repository.manager.RepositoryManager;
 
 /**
- * Reconciliation
+ * Reconciliation Service page
+ * Access point for (OntoRefine) Reconciliation Service API
  * 
  * @author Bart Hanssens
  */
 @Path("/_reconcile")
 public class ReconciliationResource extends RdfResource {
-	 private final JsonNodeFactory FAC = new JsonNodeFactory(false);
-	 private final ObjectMapper MAPPER = new ObjectMapper();
+	private final String ID = "id";
+	private final String ID_NS = "identifierSpace";
+	private final String QUERY = "query";
+	private final String SCORE  = "score";
+	private final String TYPE = "type";
+	private final String TYPE_NS = "schemaSpace";
+	
+	private final JsonNodeFactory FAC = new JsonNodeFactory(false);
+	private final ObjectMapper MAPPER = new ObjectMapper();
 	 
 	/**
-	 * Convert json input parameter into parameters for query
+	 * Convert json input parameter from GET/POST into parameters for query engine
 	 * 
-	 * @param node
-	 * @return 
+	 * @param node JSON node
+	 * @return K/V map
 	 */
-	private MultivaluedMap<String,Object> getParams(JsonNode node) {
-		MultivaluedMap<String,Object> params = new MultivaluedHashMap<>();
+	private MultivaluedMap<String,Value> getParams(JsonNode node) {
+		MultivaluedMap<String,Value> params = new MultivaluedHashMap<>();
 		
-		JsonNode q = node.get("query");
+		JsonNode q = node.get(QUERY);
 		if (q == null) {
 			throw new WebApplicationException("No query field present");
 		}
-		params.add("query", q.textValue());
+		params.add(QUERY, asLiteral(q.asText()));
 		
-		JsonNode t = node.get("type");
+		JsonNode t = node.get(TYPE);
 		if (t != null) {
-			params.add("type", asIRI(t.textValue()));
+			params.add(TYPE, asLiteral(t.asText()));
 		}
 		
 		//params.add("limit", l == null ? "10" : String.valueOf(l.asInt(3)));
@@ -97,14 +107,15 @@ public class ReconciliationResource extends RdfResource {
 		return params;
 	}
 	
-	
 	/**
 	 * Convert RDF tuple result into JSON result object
 	 * 
 	 * @param table
+	 * @param idNs
+	 * @param typeNs
 	 * @return object
 	 */
-	private JsonNode getResult(List<BindingSet> table) {	
+	private JsonNode getResult(List<BindingSet> table, String idNs, String typeNs) {	
 		ObjectNode res = FAC.objectNode();
 		ArrayNode arr = FAC.arrayNode();
 		res.set("result", arr);
@@ -114,22 +125,56 @@ public class ReconciliationResource extends RdfResource {
 		}
 		
 		for(BindingSet row: table) {
-			double score = Double.valueOf(getBindVal(row, "score"));
+			double score = Double.valueOf(getBindVal(row, SCORE));
 			boolean match = score > 10;
 			
 			ObjectNode obj = FAC.objectNode()
-								.put("id", getBindVal(row, "id"))
+								.put(ID, getBindVal(row, ID).replaceFirst(idNs, ""))
 								.put("name", getBindVal(row, "name"))
-								.put("score", score)
+								.put(SCORE, score)
 								.put("match", match);
-			
-			ArrayNode arrt = FAC.arrayNode().add(getBindVal(row, "type"));
-			obj.set("type", arrt);
+
+			ArrayNode arrt = FAC.arrayNode()
+								.add(getBindVal(row, TYPE).replaceFirst(typeNs, ""));
+			obj.set(TYPE, arrt);
 			arr.add(obj);
 		}
 		return res;
 	}
 
+	/**
+	 * Execute one reconciliation query
+	 * 
+	 * @param repo
+	 * @param node
+	 * @param idNs
+	 * @param typeNs
+	 * @return JSON node
+	 */
+	private JsonNode queryJson(String repo, JsonNode node, String idNs, String typeNs) {
+		// try exact match first
+		MultivaluedMap<String,Value> params = getParams(node);
+
+		// rewrite String (partial) identifier into full URI
+		List<Value> values = params.get(TYPE);
+		if (values != null) {
+			List<Value> iris = values.stream()
+									.map(t -> asIRI(typeNs.concat(t.stringValue())))
+									.collect(Collectors.toList());
+			params.put(TYPE, iris);
+		}
+
+		List<BindingSet> res = query(repo, "reconcile", params);
+		if (res == null || res.isEmpty()) {
+			// set Lucene fuzzyness parameter
+			String fuzzy = params.getFirst(QUERY).toString().concat("~0.8");
+			params.addFirst(QUERY, asLiteral(fuzzy));
+			res = query(repo, "reconcile_fuzzy", params);
+		}
+
+		return getResult(res, idNs, typeNs);
+	}
+	
 	/**
 	 * Show the list of available repositories
 	 * 
@@ -146,50 +191,59 @@ public class ReconciliationResource extends RdfResource {
 	@Path("/{repo}")
 	@ExceptionMetered
 	@Produces({MediaType.APPLICATION_JSON})
-	public JsonCallback queryJSONPost(@PathParam("repo") String repo, 
+	public JsonCallback queriesJSONPost(@PathParam("repo") String repo, 
 			@FormParam("queries") Optional<String> queries,
 			@FormParam("callback") Optional<String> callback) {
-		return queryJSON(repo, queries, callback);
+		return queriesJSON(repo, queries, callback);
 	}
 
 	/**
-	 * Execute a reconciliation query
+	 * Execute one or more reconciliation queries
 	 * 
 	 * @param repo repository
-	 * @param queries JSON query object
+	 * @param queries JSON object containing one or more objects
 	 * @param callback optional callback parameter
-	 * @return RDF model + JSON-LD frame
+	 * @return JSON result wrapper
 	 */
 	@GET
 	@Path("/{repo}")
 	@ExceptionMetered
 	@Produces({MediaType.APPLICATION_JSON})
-	public JsonCallback queryJSON(@PathParam("repo") String repo, 
+	public JsonCallback queriesJSON(@PathParam("repo") String repo, 
 			@QueryParam("queries") Optional<String> queries,
 			@QueryParam("callback") Optional<String> callback) {
+		String idNs;
+		String typeNs;
+		
 		JsonNode root;
 
+		// Use service metadata files a config, for namespaces
+		// Not very efficient, but faster than doing STRREPLACE etc in SPARQL
 		try {
+			String str = getReader().read(repo, "reconcile.json");
+			JsonNode config = MAPPER.readTree(str);
 			if (!queries.isPresent()) {
-				String str = getReader().read(repo, "reconcile.json");
-				return new JsonCallback(MAPPER.readTree(str), callback.orElse(""));
+				return new JsonCallback(config, callback.orElse(""));
 			}
+			// "namespaces" for identifiers
+			idNs = config.get(ID_NS).textValue();
+			typeNs = config.get(TYPE_NS).textValue();
+		} catch (IOException ex) {
+			throw new WebApplicationException("Could not read/parse config", ex);
+		}
+		
+		try {
 			root = MAPPER.readTree(queries.get());
 		} catch (IOException ex) {
-			throw new WebApplicationException(ex);
+			throw new WebApplicationException("Could not read/parse query file", ex);
 		}
 		ObjectNode results = FAC.objectNode();
 
+		// Multiple Query Mode
 		Iterator<String> fields = root.fieldNames();
         while (fields.hasNext()) {
 			String name = fields.next();
-			JsonNode node = root.get(name);
-
-			List<BindingSet> res = query(repo, "reconcile", getParams(node));
-			if (res == null || res.isEmpty()) {
-				res = query(repo, "reconcile_fuzzy", getParams(node));
-			}
-			JsonNode result = getResult(res);
+			JsonNode result = queryJson(repo, root.get(name), idNs, typeNs);
 			results.set(name, result);
 		}
 		return new JsonCallback(results, callback.orElse(""));
@@ -208,7 +262,7 @@ public class ReconciliationResource extends RdfResource {
 	@ExceptionMetered
 	@Produces({MediaType.TEXT_HTML})
 	public PreviewView preview(@PathParam("repo") String repo, @QueryParam("id") String id) {
-		MultivaluedMap<String,Object> params = new MultivaluedHashMap<>();
+		MultivaluedMap<String,String> params = new MultivaluedHashMap<>();
 		params.add("id", id);
 
 		Model m = query(repo, "preview", params, false).getModel();

@@ -36,14 +36,13 @@ import java.util.Map;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MultivaluedMap;
-import org.eclipse.rdf4j.model.IRI;
 
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
-
 import org.eclipse.rdf4j.model.vocabulary.DCAT;
 import org.eclipse.rdf4j.model.vocabulary.DCTERMS;
 import org.eclipse.rdf4j.model.vocabulary.FOAF;
@@ -54,9 +53,9 @@ import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.model.vocabulary.ROV;
 import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
+
 import org.eclipse.rdf4j.query.Binding;
 import org.eclipse.rdf4j.query.BindingSet;
-
 import org.eclipse.rdf4j.query.GraphQuery;
 import org.eclipse.rdf4j.query.MalformedQueryException;
 import org.eclipse.rdf4j.query.QueryEvaluationException;
@@ -149,17 +148,17 @@ public abstract class RdfResource {
 	 * @param params HTTP params
 	 * @return query bindings 
 	 */
-	protected HashMap<String,Value> bind(MultivaluedMap<String,?> params) {
+	protected HashMap<String,Value> toBindings(MultivaluedMap<String,?> params) {
 		HashMap<String,Value> bindings = new HashMap<>();
 		
 		if (params != null) {
 			for(String key: params.keySet()) {
 				Object p = params.getFirst(key);
 				if (p != null) {
-					if (p instanceof IRI) {
-						bindings.put(key, (IRI) p);
-					} else {
+					if (p instanceof String) {
 						bindings.put(key, asLiteral((String) p));
+					} else {
+						bindings.put(key, (Value) p);
 					}
 				}
 			}
@@ -172,11 +171,11 @@ public abstract class RdfResource {
 	 * 
 	 * @param bindingSet
 	 * @param name name of the binding
-	 * @return value or null
+	 * @return value or empty string
 	 */
 	protected String getBindVal(BindingSet bindingSet, String name) {
 		Binding b = bindingSet.getBinding(name);
-		return (b != null ? b.getValue().stringValue() : null);
+		return (b != null ? b.getValue().stringValue() : "");
 	}
 	
 	/**
@@ -188,18 +187,18 @@ public abstract class RdfResource {
 	 * @return results in bindingset list
 	 */
 	protected List<BindingSet> query(String repoName, String qryName, 
-										MultivaluedMap<String,Object> params) {
+										MultivaluedMap<String,?> params) {
 		Repository repo = getRepository(repoName);
 		
 		String qry = qr.getQuery(repoName, qryName);
 		
 		// Replace params here for performance (mostly within glue BIND's) 
 		MapBindingSet bs = new MapBindingSet();
-		bind(params).forEach((k,v) -> bs.addBinding(k, v));
+		toBindings(params).forEach((k,v) -> bs.addBinding(k, v));
 		qry = QueryStringUtil.getTupleQueryString(qry, bs);
 System.err.println(qry);
 		try {
-			return Repositories.tupleQuery(repo, qry, r -> QueryResults.asList(r));
+			return Repositories.tupleQueryNoTransaction(repo, qry, r -> QueryResults.asList(r));
 		} catch (RepositoryException|MalformedQueryException|QueryEvaluationException e) {
 			throw new WebApplicationException("Error executing query", e);
 		}
@@ -215,7 +214,7 @@ System.err.println(qry);
 	 * @return results in triple model
 	 */
 	protected ModelFrame query(String repoName, String qryName, 
-							MultivaluedMap<String,?> params, boolean getFrame) {
+							MultivaluedMap<String,String> params, boolean getFrame) {
 		Repository repo = getRepository(repoName);
 		
 		String f = (getFrame) ? qr.getFrame(repoName, qryName) : "";
@@ -223,7 +222,7 @@ System.err.println(qry);
 		
 		// Replace params here for performance (mostly within glue BIND's) 
 		MapBindingSet bs = new MapBindingSet();
-		bind(params).forEach((k,v) -> bs.addBinding(k, v));
+		toBindings(params).forEach((k,v) -> bs.addBinding(k, v));
 		qry = QueryStringUtil.getGraphQueryString(qry, bs);
 	
 		try (RepositoryConnection conn = repo.getConnection()) {
