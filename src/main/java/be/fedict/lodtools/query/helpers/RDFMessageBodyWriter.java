@@ -44,7 +44,7 @@ import org.eclipse.rdf4j.rio.RDFHandlerException;
 import org.eclipse.rdf4j.rio.Rio;
 
 /**
- * RDF Writer for exporting RDF to JSON-LD files using JSON-LD Framing.
+ * RDF Writer for exporting RDF to N-Triples or Turtle
  * 
  * @author Bart.Hanssens
  */

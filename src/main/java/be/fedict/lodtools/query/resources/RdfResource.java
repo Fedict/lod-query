@@ -186,11 +186,11 @@ public abstract class RdfResource {
 	 * @param params parameters for binding (if any)
 	 * @return results in bindingset list
 	 */
-	protected List<BindingSet> query(String repoName, String qryName, 
+	protected List<BindingSet> query(String repoName, String cl, String qryName, 
 										MultivaluedMap<String,?> params) {
 		Repository repo = getRepository(repoName);
 		
-		String qry = qr.getQuery(repoName, qryName);
+		String qry = qr.getQuery(repoName, cl, qryName);
 		
 		// Replace params here for performance (mostly within glue BIND's) 
 		MapBindingSet bs = new MapBindingSet();

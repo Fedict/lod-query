@@ -57,6 +57,7 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.Response;
 
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Value;
@@ -110,9 +111,9 @@ public class ReconciliationResource extends RdfResource {
 	/**
 	 * Convert RDF tuple result into JSON result object
 	 * 
-	 * @param table
-	 * @param idNs
-	 * @param typeNs
+	 * @param table result set
+	 * @param idNs ID namespaces
+	 * @param typeNs type namespaces
 	 * @return object
 	 */
 	private JsonNode getResult(List<BindingSet> table, String idNs, String typeNs) {	
@@ -145,13 +146,14 @@ public class ReconciliationResource extends RdfResource {
 	/**
 	 * Execute one reconciliation query
 	 * 
-	 * @param repo
+	 * @param repo repository name
+	 * @param cl class
 	 * @param node
-	 * @param idNs
-	 * @param typeNs
+	 * @param idNs ID namespace
+	 * @param typeNs type namespace
 	 * @return JSON node
 	 */
-	private JsonNode queryJson(String repo, JsonNode node, String idNs, String typeNs) {
+	private JsonNode queryJson(String repo, String cl, JsonNode node, String idNs, String typeNs) {
 		// try exact match first
 		MultivaluedMap<String,Value> params = getParams(node);
 
@@ -164,12 +166,12 @@ public class ReconciliationResource extends RdfResource {
 			params.put(TYPE, iris);
 		}
 
-		List<BindingSet> res = query(repo, "reconcile", params);
+		List<BindingSet> res = query(repo, cl, "reconcile", params);
 		if (res == null || res.isEmpty()) {
 			// set Lucene fuzzyness parameter
 			String fuzzy = params.getFirst(QUERY).toString().concat("~0.8");
 			params.addFirst(QUERY, asLiteral(fuzzy));
-			res = query(repo, "reconcile_fuzzy", params);
+			res = query(repo, cl, "reconcile_fuzzy", params);
 		}
 
 		return getResult(res, idNs, typeNs);
@@ -186,37 +188,44 @@ public class ReconciliationResource extends RdfResource {
 	public RepositoryListView repoList() {
 		return new RepositoryListView("_reconcile", listRepositories());
 	}
-
+	
+	/**
+	 * Execute one or more reconciliation queries
+	 * 
+	 * @param repo repository
+	 * @param cl class
+	 * @param queries JSON object containing one or more objects
+	 * @param callback optional callback parameter
+	 * @return JSON result wrapper
+	 */
 	@POST
-	@Path("/{repo}")
+	@Path("/{repo}/{class}")
 	@ExceptionMetered
-	@Produces({MediaType.APPLICATION_JSON})
-	public JsonCallback queriesJSONPost(@PathParam("repo") String repo, 
+	@Produces({MediaType.APPLICATION_JSON,MediaType.TEXT_HTML})
+	public JsonCallback queriesJsonPost(
+			@PathParam("repo") String repo, 
+			@PathParam("class") String cl, 
 			@FormParam("queries") Optional<String> queries,
 			@FormParam("callback") Optional<String> callback) {
-		return queriesJSON(repo, queries, callback);
-	}
-
-	@GET
-	@Path("/{repo}")
-	@Produces({MediaType.TEXT_HTML})
-	public ServiceListView service(@PathParam("repo") String repo) {
-		return new ServiceListView(repo, listQueries(repo).get("reconcile.qr"));
+		return queriesJsonGet(repo, cl, queries, callback);
 	}
 	
 	/**
 	 * Execute one or more reconciliation queries
 	 * 
 	 * @param repo repository
+	 * @param cl class
 	 * @param queries JSON object containing one or more objects
 	 * @param callback optional callback parameter
 	 * @return JSON result wrapper
 	 */
 	@GET
-	@Path("/{repo}")
+	@Path("/{repo}/{class}")
 	@ExceptionMetered
 	@Produces({MediaType.APPLICATION_JSON})
-	public JsonCallback queriesJSON(@PathParam("repo") String repo, 
+	public JsonCallback queriesJsonGet(
+			@PathParam("repo") String repo, 
+			@PathParam("class") String cl, 	
 			@QueryParam("queries") Optional<String> queries,
 			@QueryParam("callback") Optional<String> callback) {
 		String idNs;
@@ -227,7 +236,7 @@ public class ReconciliationResource extends RdfResource {
 		// Use service metadata files a config, for namespaces
 		// Not very efficient, but faster than doing STRREPLACE etc in SPARQL
 		try {
-			String str = getReader().read(repo, "reconcile.json");
+			String str = getReader().read(repo, cl, "reconcile.json");
 			JsonNode config = MAPPER.readTree(str);
 			if (!queries.isPresent()) {
 				return new JsonCallback(config, callback.orElse(""));
@@ -250,10 +259,23 @@ public class ReconciliationResource extends RdfResource {
 		Iterator<String> fields = root.fieldNames();
         while (fields.hasNext()) {
 			String name = fields.next();
-			JsonNode result = queryJson(repo, root.get(name), idNs, typeNs);
+			JsonNode result = queryJson(repo, cl, root.get(name), idNs, typeNs);
 			results.set(name, result);
 		}
 		return new JsonCallback(results, callback.orElse(""));
+	}
+	
+	/**
+	 * Show information about reconciliation service
+	 * 
+	 * @param repo repository name
+	 * @return HTML page
+	 */
+	@GET
+	@Path("/{repo}/help")
+	@Produces({MediaType.TEXT_HTML})
+	public ServiceListView service(@PathParam("repo") String repo) {		
+		return new ServiceListView(repo, listQueries(repo).get("reconcile.qr"));
 	}
 	
 	/**
@@ -261,7 +283,6 @@ public class ReconciliationResource extends RdfResource {
 	 * 
 	 * @param repo repository
 	 * @param id ID to preview
-	 * 
 	 * @return HTML preview
 	 */
 	@GET

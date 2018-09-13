@@ -54,14 +54,13 @@ public class QueryReader {
 	/**
 	 * Read the query or frame from text file
 	 * 
-	 * @param repoName repository name
-	 * @param file file name
+	 * @param path to file 
 	 * @return raw file content
 	 * @throws IOException
 	 */
-	public String read(String repoName, String file) throws IOException {		
-		Path p = Paths.get(root, repoName, file);
-		LOG.info("Load from {}", file);
+	public String read(String... path) throws IOException {
+		Path p = Paths.get(root, path);
+		LOG.info("Load from {}", p.getFileName().toString());
 		
 		StringBuilder buffer = new StringBuilder();
 		try (BufferedReader r = Files.newBufferedReader(p)) {
@@ -121,13 +120,13 @@ public class QueryReader {
 	/**
 	 * Get the JSON-LD Frame
 	 * 
-	 * @param repoName repository name
-	 * @param qryName query name
+	 * @param file path to frame
 	 * @return JSON-LD frame or null
 	 */
-	public String getFrame(String repoName, String qryName) {
+	public String getFrame(String... file) {
 		try {
-			return read(repoName, qryName + ".frame");
+			file[file.length-1] = file[file.length-1] + ".frame";
+			return read(file);
 		} catch (IOException ex) {
 			LOG.info("Could not read JSON-LD frame");
 			return null;
@@ -137,16 +136,16 @@ public class QueryReader {
 	/**
 	 * Get the query string
 	 * 
-	 * @param repoName repository name
-	 * @param qryName query name
+	 * @param file path to query
 	 * @return raw query string
 	 * @throws WebApplicationException
 	 */
-	public String getQuery(String repoName, String qryName) {
+	public String getQuery(String... file) {
 		try {
-			return read(repoName, qryName + ".qr");
+			file[file.length-1] = file[file.length-1] + ".qr";
+			return read(file);
 		} catch (IOException ex) {
-			LOG.error("Couldn't read query {} for repo {}", qryName, repoName);
+			LOG.error("Couldn't read query");
 			throw new WebApplicationException(ex);
 		}
 	}
