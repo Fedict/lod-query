@@ -97,8 +97,10 @@ public class QueryReader {
 		Map<String,QueryComment> map = new TreeMap<>();
 		
 		File[] files = Paths.get(root, repoName).toFile()
-				.listFiles(f -> { return f.getName().endsWith(".qr"); } );
-		
+						.listFiles(f -> { String name = f.getName();
+							return name.endsWith(".qr") && !name.startsWith("_"); } 
+						);
+
 		if (files == null) {
 			LOG.error("Could not get queries for repository {}", repoName);
 			return map;
@@ -142,7 +144,6 @@ public class QueryReader {
 	 */
 	public String getQuery(String... file) {
 		try {
-			file[file.length-1] = file[file.length-1] + ".qr";
 			return read(file);
 		} catch (IOException ex) {
 			LOG.error("Couldn't read query");

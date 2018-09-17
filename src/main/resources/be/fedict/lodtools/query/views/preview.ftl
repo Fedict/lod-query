@@ -5,18 +5,13 @@
 <style>
 <#include "style.css">
 </style>
-<title>List of reconciliation services</title>
 </head>
 <body>
-<#assign s = services>
+<#assign l = labels>
 <main>
-    <div id="container">
-    <h1>List of repositories</h1>
-    <ul>
-    <#list s as service>
-	<li><a href="_reconcile/${service}">${service}</a></li>
+    <#list l as label>
+	<p>${label}</p>
     </#list>
-    </ul>
 </main>
 </body>
 </html>

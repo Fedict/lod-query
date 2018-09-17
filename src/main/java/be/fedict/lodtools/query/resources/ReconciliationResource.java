@@ -28,8 +28,8 @@ package be.fedict.lodtools.query.resources;
 import be.fedict.lodtools.query.helpers.JsonCallback;
 import be.fedict.lodtools.query.helpers.ReconcileReader;
 import be.fedict.lodtools.query.views.PreviewView;
+import be.fedict.lodtools.query.views.QueryListView;
 import be.fedict.lodtools.query.views.RepositoryListView;
-import be.fedict.lodtools.query.views.ServiceListView;
 
 import com.codahale.metrics.annotation.ExceptionMetered;
 
@@ -57,11 +57,11 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
 
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.util.Models;
+import org.eclipse.rdf4j.query.Binding;
 import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.repository.manager.RepositoryManager;
 
@@ -161,17 +161,17 @@ public class ReconciliationResource extends RdfResource {
 		List<Value> values = params.get(TYPE);
 		if (values != null) {
 			List<Value> iris = values.stream()
-									.map(t -> asIRI(typeNs.concat(t.stringValue())))
+									.map(t -> asIRI(typeNs, t.stringValue()))
 									.collect(Collectors.toList());
 			params.put(TYPE, iris);
 		}
 
-		List<BindingSet> res = query(repo, cl, "reconcile", params);
+		List<BindingSet> res = query(repo, cl + ".qr", params);
 		if (res == null || res.isEmpty()) {
 			// set Lucene fuzzyness parameter
 			String fuzzy = params.getFirst(QUERY).toString().concat("~0.8");
 			params.addFirst(QUERY, asLiteral(fuzzy));
-			res = query(repo, cl, "reconcile_fuzzy", params);
+			res = query(repo, "_" + cl + "_fuzzy.qr", params);
 		}
 
 		return getResult(res, idNs, typeNs);
@@ -188,7 +188,20 @@ public class ReconciliationResource extends RdfResource {
 	public RepositoryListView repoList() {
 		return new RepositoryListView("_reconcile", listRepositories());
 	}
-	
+
+	/**
+	 * Show the list of available queries
+	 * 
+	 * @param repo repository name
+	 * @return list of queries
+	 */
+	@GET
+	@Path("/{repo}")
+	@Produces({MediaType.TEXT_HTML})
+	public QueryListView queryList(@PathParam("repo") String repo) {
+		return new QueryListView(repo, listQueries(repo));
+	}
+
 	/**
 	 * Execute one or more reconciliation queries
 	 * 
@@ -236,7 +249,7 @@ public class ReconciliationResource extends RdfResource {
 		// Use service metadata files a config, for namespaces
 		// Not very efficient, but faster than doing STRREPLACE etc in SPARQL
 		try {
-			String str = getReader().read(repo, cl, "reconcile.json");
+			String str = getReader().read(repo, cl + ".json");
 			JsonNode config = MAPPER.readTree(str);
 			if (!queries.isPresent()) {
 				return new JsonCallback(config, callback.orElse(""));
@@ -266,37 +279,42 @@ public class ReconciliationResource extends RdfResource {
 	}
 	
 	/**
-	 * Show information about reconciliation service
-	 * 
-	 * @param repo repository name
-	 * @return HTML page
-	 */
-	@GET
-	@Path("/{repo}/help")
-	@Produces({MediaType.TEXT_HTML})
-	public ServiceListView service(@PathParam("repo") String repo) {		
-		return new ServiceListView(repo, listQueries(repo).get("reconcile.qr"));
-	}
-	
-	/**
 	 * Get a preview
 	 * 
 	 * @param repo repository
+	 * @param cl
 	 * @param id ID to preview
 	 * @return HTML preview
 	 */
 	@GET
-	@Path("/{repo}/preview")
+	@Path("/{repo}/_{class}_preview")
 	@ExceptionMetered
 	@Produces({MediaType.TEXT_HTML})
-	public PreviewView preview(@PathParam("repo") String repo, @QueryParam("id") String id) {
-		MultivaluedMap<String,String> params = new MultivaluedHashMap<>();
-		params.add("id", id);
-
-		Model m = query(repo, "preview", params, false).getModel();
-		Set<String> labels = Models.objectStrings(m);
+	public PreviewView preview(@PathParam("repo") String repo, 
+					@PathParam("class") String cl, @QueryParam("id") String id) {
+		String idNs = "";
+		// Use service metadata files a config, for namespaces
+		// Not very efficient, but faster than doing STRREPLACE etc in SPARQL
+		try {
+			String str = getReader().read(repo, cl + ".json");
+			JsonNode config = MAPPER.readTree(str);
+	
+			// "namespaces" for identifiers
+			idNs = config.get(ID_NS).textValue();
+		} catch (IOException ex) {
+			throw new WebApplicationException("Could not read/parse config", ex);
+		}
 		
-		return new PreviewView(id, labels.toArray(new String[0]));
+		MultivaluedMap<String,Value> params = new MultivaluedHashMap<>();
+		params.add("id", asIRI(idNs, id));
+
+		List<BindingSet> bs = query(repo, "_" + cl + "_preview.qr", params);
+		String[] labels = bs.stream()
+							.filter(b -> b.hasBinding("label"))
+							.map(b -> b.getBinding("label").getValue().stringValue())
+							.toArray(String[]::new);
+
+		return new PreviewView(id, labels);
 	}
 	
 	/**
